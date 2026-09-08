@@ -59,9 +59,13 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
         <>
           <div style={{ height: 1, background: tokens.surface.border, marginTop: tokens.spacing.sectionGap }} />
           <div data-section-key="skills" style={{ marginTop: tokens.spacing.sectionGap }}>
-            <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>
-              <span data-field="categories.0.category_name">{softSkillsCategory.category_name}</span>
-            </Heading>
+            {/* Glued to its first bullet so the heading can never be left alone at the
+                foot of a page; the list itself stays free to flow. */}
+            <div style={{ breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+              <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>
+                <span data-field="categories.0.category_name">{softSkillsCategory.category_name}</span>
+              </Heading>
+            </div>
             <BulletList tokens={tokens} items={softSkillsCategory.skills} dataFieldPrefix="categories.0.skills" style="disc" />
           </div>
         </>
@@ -74,15 +78,28 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
             return (
               <div key={realIndex}>
                 <div style={{ height: 1, background: tokens.surface.border, marginTop: tokens.spacing.sectionGap }} />
-                <div style={{ marginTop: tokens.spacing.sectionGap, breakInside: "avoid", pageBreakInside: "avoid" }}>
-                  <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>
-                    <span data-field={`categories.${realIndex}.category_name`}>{category.category_name}</span>
-                  </Heading>
-                  <div style={{ display: "flex", flexDirection: "column", gap: tokens.spacing.itemGap * 0.6 }}>
+                {/* No breakInside:avoid on the category. It used to be atomic, so
+                    adding one skill pushed the WHOLE category (heading + every box) to
+                    the next page rather than letting the boxes continue there. The
+                    heading below carries breakAfter:avoid instead, so a break can only
+                    fall BETWEEN boxes - never between a category and its first box. */}
+                <div style={{ marginTop: tokens.spacing.sectionGap }}>
+                  <div style={{ breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+                    <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>
+                      <span data-field={`categories.${realIndex}.category_name`}>{category.category_name}</span>
+                    </Heading>
+                  </div>
+                  {/* Block flow, not a flex column: a flex item is fragmented as one
+                      opaque box, so a flex container's children cannot be split across
+                      pages. Each box carries its own marginBottom in place of the
+                      former `gap`. */}
+                  <div>
                     {category.skills.map((skill, skillIndex) => (
-                      <SkillBox key={skillIndex} tokens={tokens}>
-                        <span data-field={`categories.${realIndex}.skills.${skillIndex}`}>{skill}</span>
-                      </SkillBox>
+                      <div key={skillIndex} style={{ marginBottom: tokens.spacing.itemGap * 0.6, breakInside: "avoid", pageBreakInside: "avoid" }}>
+                        <SkillBox tokens={tokens}>
+                          <span data-field={`categories.${realIndex}.skills.${skillIndex}`}>{skill}</span>
+                        </SkillBox>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -94,7 +111,11 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
   );
 
   const right = (
-    <div style={{ padding: "32px 36px 32px 0", boxSizing: "border-box" }}>
+    // The left inset is the column's own, not the row's. It used to be 0 and rely on
+    // the parent flex `gap` for separation from the sidebar - but that gap is dropped
+    // when the columns are composed onto a paginated sheet (a tinted sidebar's panel
+    // edge is the divider there), which left this text flush against the panel.
+    <div style={{ padding: "32px 36px 32px 40px", boxSizing: "border-box" }}>
       {/* Header */}
       <div data-section-key="header">
         <Heading tokens={tokens} variant="name" dataField="full_name">
@@ -195,10 +216,15 @@ export default function StudentSidebarTemplate({ sectionsByType, theme }: Studen
   const tokens = getThemeTokens(theme);
   const { left, right } = buildSplitSections({ sectionsByType, theme });
 
+  // No flexWrap: inside an A4 content area (714px) the old `width:30%` computed to
+  // 214px, below its own `minWidth:220`, so the sidebar sat at its minimum and
+  // 220 + 320 + gap could exceed the row - wrapping the columns on top of each other.
+  // A fixed sidebar width removes the percentage/min-width conflict entirely, and the
+  // main column takes whatever is left.
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", flexWrap: "wrap", gap: tokens.spacing.sectionGap }}>
-      <div style={{ width: "30%", minWidth: 220, flexShrink: 0 }}>{left}</div>
-      <div style={{ flex: "1 1 320px", minWidth: 0 }}>{right}</div>
+    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: tokens.spacing.sectionGap }}>
+      <div style={{ flex: "0 0 230px", minWidth: 0 }}>{left}</div>
+      <div style={{ flex: "1 1 auto", minWidth: 0 }}>{right}</div>
     </div>
   );
 }

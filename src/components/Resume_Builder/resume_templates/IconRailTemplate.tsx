@@ -1,6 +1,6 @@
 "use client";
 
-import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Text, Heading, ContactGroup, SkillWithLevel, Rail, RailSectionHeading, RAIL_INDENT, SectionPill, ProjectsLinkList, EntryExperience, SummaryParagraph, EntryLinkList, EducationSimple, User, Briefcase, Code2, BookOpen, GraduationCap, FileText, Star } from "@/components/Resume_Builder/resume_templates_imports";
+import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Text, Heading, ContactGroup, SkillWithLevel, railBorderStyle, RailSectionHeading, RAIL_INDENT, SectionPill, ProjectsLinkList, EntryExperience, SummaryParagraph, EntryLinkList, EducationSimple, User, Briefcase, Code2, BookOpen, GraduationCap, FileText, Star } from "@/components/Resume_Builder/resume_templates_imports";
 
 export const templateId = "icon-rail-v1";
 export const templateName = "Icon Rail";
@@ -108,10 +108,12 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
   );
 
   const right = (
-    <div style={{ padding: "32px 36px", boxSizing: "border-box" }}>
-      <div style={{ position: "relative" }}>
-        {/* Rail */}
-        <Rail tokens={tokens} />
+    <div style={{ padding: "12px 16px", boxSizing: "border-box"}}>
+      {/* Rail painted as this wrapper's background rather than an absolutely-
+          positioned <Rail/>, so it repeats on every fragment when the column is
+          split across pages. A background costs no width, so the column keeps its
+          full measured size. position:relative stays for SectionPill below. */}
+      <div style={{ position: "relative", ...railBorderStyle(tokens) }}>
 
         {/* Summary */}
         {summary?.summary ? (

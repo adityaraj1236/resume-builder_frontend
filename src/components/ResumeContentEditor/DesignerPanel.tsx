@@ -58,7 +58,10 @@ function TemplateThumbnail({ templateId, active }: { templateId: string; active:
       aria-hidden="true"
       style={{
         width: "100%",
-        aspectRatio: "3 / 4",
+        // Height is derived from the card's width, so this ratio is the only lever -
+        // there is no height value to set. At the panel's current ~464px width this
+        // yields ~500px tall (3/4 gave ~565px).
+        aspectRatio: "3 / 3.23",
         borderRadius: 4,
         background: "#f3f4f6",
         padding: 8,

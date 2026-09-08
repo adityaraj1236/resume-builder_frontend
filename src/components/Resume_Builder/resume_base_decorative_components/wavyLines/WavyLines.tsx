@@ -22,3 +22,41 @@ export default function WavyLines({ tokens, rows = 5, color, opacity = 0.2 }: Wa
     </div>
   );
 }
+
+// Fragmentation-safe alternative to <WavyLines/>: styles to spread onto the panel the
+// lines should sign off. Same reasoning as railBorderStyle() in Rail.tsx - an element
+// lives in exactly ONE fragment, so when a paginator splits the panel the decoration
+// appears on a single page (and, pinned by `marginTop:auto` in a flex column, lands
+// mid-panel once that column becomes block flow). A BACKGROUND is painted per-fragment
+// by the browser, so anchoring it to `bottom` puts it at the foot of EVERY page the
+// panel spans.
+//
+// The SVG is inlined as a data URI rather than fetched, so it needs no network request
+// and cannot be blocked by a CSP that forbids external images.
+export function wavyLinesBackgroundStyle({
+  tokens,
+  rows = 5,
+  color,
+  opacity = 0.2,
+  rowHeight = 10,
+  rowGap = 4,
+}: WavyLinesProps & { rowHeight?: number; rowGap?: number }): React.CSSProperties {
+  const strokeColor = color ?? tokens.accent;
+  const bandHeight = rows * rowHeight + (rows - 1) * rowGap;
+  // One SVG holding every row, sized to the whole band. Percentage width lets it
+  // stretch to the panel; the viewBox keeps the wave proportions.
+  const paths = Array.from({ length: rows })
+    .map((_, index) => {
+      const y = index * (rowHeight + rowGap) + rowHeight / 2;
+      return `<path d='M0,${y} Q50,${y - 5} 100,${y} T200,${y}' fill='none' stroke='${strokeColor}' stroke-width='1.5'/>`;
+    })
+    .join("");
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 ${bandHeight}' preserveAspectRatio='none' opacity='${opacity}'>${paths}</svg>`;
+
+  return {
+    backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+    backgroundPosition: "left bottom",
+    backgroundSize: `100% ${bandHeight}px`,
+    backgroundRepeat: "no-repeat",
+  };
+}

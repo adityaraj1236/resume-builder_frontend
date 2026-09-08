@@ -1,6 +1,6 @@
 "use client";
 
-import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Photo, Text, ContactGroup, BulletList, SkillWithLevel, IconUpload, Blob, DotGrid, QuoteCard, Rail, WavyLines, RailSectionHeading, RAIL_INDENT, ProjectsLinkList, EntryExperience, EducationSimple, CertificationsLogoGrid, PublicationsList, SummaryParagraph, GraduationCap, Award, FolderOpen, BadgeCheck, BookOpen } from "@/components/Resume_Builder/resume_templates_imports";
+import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Photo, Text, ContactGroup, BulletList, SkillWithLevel, IconUpload, Blob, DotGrid, QuoteCard, railBorderStyle, wavyLinesBackgroundStyle, RailSectionHeading, RAIL_INDENT, ProjectsLinkList, EntryExperience, EducationSimple, CertificationsLogoGrid, PublicationsList, SummaryParagraph, GraduationCap, Award, FolderOpen, BadgeCheck, BookOpen } from "@/components/Resume_Builder/resume_templates_imports";
 
 export const templateId = "portfolio-blob-v1";
 export const templateName = "Portfolio Blob";
@@ -60,7 +60,27 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
   const restOfName = nameTokens.slice(1).join(" ");
 
   const left = (
-    <div style={{ height: "100%", boxSizing: "border-box", background: tokens.surface.card, borderRight: `1px solid ${tokens.surface.border}`, padding: "32px 22px 32px 24px", display: "flex", flexDirection: "column" }}>
+    // Block flow, not a flex column. A flex item is fragmented as one opaque box, so
+    // a flex container's children cannot be split across pages - the sidebar would
+    // move whole to page 2 rather than continuing. (This also drops `height: 100%`,
+    // which did nothing useful once composed: the paginator's slot paints the panel
+    // background to the sheet's bottom edge instead.)
+    // data-panel-decoration marks this as the sidebar panel. When the paginator
+    // composes the columns it moves the decoration onto the full-height page SLOT (see
+    // PagedJsPreview), because this node only grows as tall as its content - a
+    // background anchored to ITS bottom would sit under the last section, not at the
+    // foot of the page. In the unpaginated preview the style stays here, where the
+    // panel is the full height anyway.
+    <div
+      data-panel-decoration="wavy-lines"
+      style={{
+        boxSizing: "border-box",
+        background: tokens.surface.card,
+        borderRight: `1px solid ${tokens.surface.border}`,
+        padding: "32px 22px 32px 24px",
+        ...wavyLinesBackgroundStyle({ tokens }),
+      }}
+    >
       {/* Photo */}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div style={{ position: "relative", width: PHOTO_SIZE + 30, height: PHOTO_SIZE + 30 }}>
@@ -108,9 +128,13 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
             <span data-field="categories.0.category_name">{softSkillsCategory.category_name}</span>
           </SidebarHeading>
           {softSkillsLevels ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: tokens.spacing.itemGap * 0.6 }}>
+            // Block flow, not a flex column, so the rows can split across pages; each
+            // row carries its own marginBottom in place of the container's gap.
+            <div>
               {softSkillsCategory.skills.map((skill, skillIndex) => (
-                <SkillWithLevel key={skillIndex} tokens={tokens} skill={skill} dataField={`categories.0.skills.${skillIndex}`} level={softSkillsLevels[skillIndex]} meterType="dots" layout="row" />
+                <div key={skillIndex} style={{ marginBottom: tokens.spacing.itemGap * 0.6, breakInside: "avoid", pageBreakInside: "avoid" }}>
+                  <SkillWithLevel tokens={tokens} skill={skill} dataField={`categories.0.skills.${skillIndex}`} level={softSkillsLevels[skillIndex]} meterType="dots" layout="row" />
+                </div>
               ))}
             </div>
           ) : (
@@ -143,7 +167,10 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
         const realIndex = extraIndex + 2;
         if (category.skills.length === 0) return null;
         return (
-          <div key={realIndex} style={{ marginTop: tokens.spacing.sectionGap, breakInside: "avoid", pageBreakInside: "avoid" }}>
+          // No breakInside:avoid: a long category should let its bullets continue on
+          // the next page rather than moving the whole category there. SidebarHeading
+          // already carries breakAfter:avoid, so the heading stays with its first item.
+          <div key={realIndex} style={{ marginTop: tokens.spacing.sectionGap }}>
             <SidebarHeading tokens={tokens}>
               <span data-field={`categories.${realIndex}.category_name`}>{category.category_name}</span>
             </SidebarHeading>
@@ -152,15 +179,21 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
         );
       })}
 
-      {/* Footer decoration */}
-      <div style={{ marginTop: "auto", marginLeft: -24, marginRight: -22, marginBottom: -32, paddingTop: tokens.spacing.sectionGap }}>
-        <WavyLines tokens={tokens} />
-      </div>
+      {/* Footer decoration is painted as this panel's BACKGROUND (see the panel div
+          above), not rendered here as an element. An element lives in one fragment
+          only, so under pagination it appeared on a single page - and once the column
+          became block flow its `marginTop:auto` pin stopped working, stranding it
+          mid-panel. A background is painted per-fragment and anchored to `bottom`, so
+          the lines sign off the foot of EVERY page the sidebar spans. */}
     </div>
   );
 
   const right = (
-    <div style={{ padding: "32px 36px 32px 0", boxSizing: "border-box" }}>
+    // The left inset is the column's own, not the row's. It used to be 0 and rely on
+    // the parent flex `gap` - but that gap is dropped when the columns are composed
+    // onto a paginated sheet (a tinted sidebar's panel edge is the divider there),
+    // which left this text flush against the panel.
+    <div style={{ padding: "32px 36px 32px 40px", boxSizing: "border-box" }}>
       {/* Header */}
       <div data-section-key="header">
         <div data-field="full_name" style={{ fontFamily: tokens.font.family, fontWeight: tokens.font.headingWeight, fontSize: tokens.font.sizes.name, lineHeight: tokens.font.lineHeights.heading }}>
@@ -185,9 +218,11 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
         </div>
       ) : null}
 
-      {/* Rail */}
-      <div style={{ position: "relative", marginTop: tokens.spacing.sectionGap }}>
-        <Rail tokens={tokens} />
+      {/* Rail painted as this wrapper's background rather than an absolutely-
+          positioned <Rail/>, so it repeats on every fragment when the column is
+          split across pages - an absolute element lives in ONE fragment only and
+          vanishes from continuation pages. Same swap IconRailTemplate already made. */}
+      <div style={{ position: "relative", marginTop: tokens.spacing.sectionGap, ...railBorderStyle(tokens) }}>
 
         {/* Education */}
         {education && education.entries.length > 0 ? (
@@ -260,9 +295,9 @@ export default function PortfolioBlobTemplate({ sectionsByType, theme }: Portfol
   const { left, right } = buildSplitSections({ sectionsByType, theme });
 
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", flexWrap: "wrap", gap: tokens.spacing.sectionGap }}>
-      <div style={{ width: "30%", minWidth: 220, flexShrink: 0 }}>{left}</div>
-      <div style={{ flex: "1 1 340px", minWidth: 0 }}>{right}</div>
+    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: tokens.spacing.sectionGap }}>
+      <div style={{ flex: "0 0 230px", minWidth: 0 }}>{left}</div>
+      <div style={{ flex: "1 1 auto", minWidth: 0 }}>{right}</div>
     </div>
   );
 }

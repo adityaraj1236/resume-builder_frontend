@@ -27,6 +27,39 @@ import PortfolioBlobTemplate from "@/components/Resume_Builder/resume_templates/
 import IconRailTemplate from "@/components/Resume_Builder/resume_templates/IconRailTemplate";
 import CenteredTimelineTemplate from "@/components/Resume_Builder/resume_templates/CenteredTimelineTemplate";
 import IconLineTemplate from "@/components/Resume_Builder/resume_templates/IconLineTemplate";
+import PagedJsPreview from "@/components/Resume_Builder/pagedjs_poc/PagedJsPreview";
+import PagedJsSingleFlow from "@/components/Resume_Builder/pagedjs_poc/PagedJsSingleFlow";
+
+// Single-column templates: one Paged.js run over the whole template. This is what
+// Paged.js is designed for, so it needs no column detection, header extraction or
+// page composition - see PagedJsSingleFlow.
+//
+// centered-timeline-v1 has one caveat: its Skills + Certifications pair sits in a
+// 1fr/1fr grid, which Paged.js cannot split, so that pair moves to the next page as
+// a unit if it does not fit. Everything else paginates normally.
+const PAGEDJS_SINGLE_FLOW_TEMPLATE_IDS = new Set(["icon-line-v1", "centered-timeline-v1"]);
+
+// Two-column templates: Paged.js run once per column, then page N of each composed
+// side by side (PagedJsPreview). Needed because Paged.js cannot fragment flex/grid
+// columns independently - a flex item is one opaque fragment.
+//
+// IconRail qualifies because its sidebar carries real content (skills, achievements)
+// rather than being a fixed rail, and it has no absolutely-positioned ornaments - its
+// one blocker, the Rail line, now draws as a border so it repeats on every page.
+//
+// StudentSidebar qualifies for the same reason IconRail does: its sidebar carries real
+// content (contact, soft skills, tech skills), it is tinted so .poc-col-tinted bleeds
+// the panel to the sheet edge, and it has no cross-column header - the name lives
+// inside the main column, so extractHeader correctly returns null and no spacer is
+// injected. Its one absolutely-positioned ornament (the accent spine) is anchored to
+// the photo, so page 1 only is the intended result.
+//
+// PortfolioBlob was previously excluded over "four absolutely-positioned ornaments",
+// but only one of those actually blocked pagination: Blob and DotGrid are inline SVG
+// beside the photo (page 1, where they belong) and WavyLines was never absolute. The
+// real blocker was <Rail/>, now swapped for railBorderStyle() - a background gradient
+// that repeats on every fragment - exactly as IconRail already did.
+const PAGEDJS_POC_TEMPLATE_IDS = new Set(["two-column-icon-v1", "icon-rail-v1", "student-sidebar-v1", "portfolio-blob-v1"]);
 
 // Whole-page templates render every section themselves (mirrors a pitch deck slide
 // being one self-contained component) instead of stacking independently-swappable
@@ -243,6 +276,15 @@ export default function ResumeRenderer({ initialDocument, designRegistry }: Resu
         />
 
         <div style={{ flex: 1, minWidth: 0 }}>
+          {PageTemplateComponent && PAGEDJS_SINGLE_FLOW_TEMPLATE_IDS.has(workingDocument.template_id) ? (
+            <PagedJsSingleFlow>
+              <PageTemplateComponent sectionsByType={sectionsByType} theme={workingDocument.theme} />
+            </PagedJsSingleFlow>
+          ) : PageTemplateComponent && PAGEDJS_POC_TEMPLATE_IDS.has(workingDocument.template_id) ? (
+            <PagedJsPreview>
+              <PageTemplateComponent sectionsByType={sectionsByType} theme={workingDocument.theme} />
+            </PagedJsPreview>
+          ) : (
           <div
             id="resume-page"
             ref={resumePageRef}
@@ -277,6 +319,7 @@ export default function ResumeRenderer({ initialDocument, designRegistry }: Resu
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

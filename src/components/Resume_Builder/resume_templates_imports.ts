@@ -27,8 +27,8 @@ export { default as IconBadge } from "@/components/Resume_Builder/resume_base_de
 export { default as Blob } from "@/components/Resume_Builder/resume_base_decorative_components/blob/Blob";
 export { default as DotGrid } from "@/components/Resume_Builder/resume_base_decorative_components/dotGrid/DotGrid";
 export { default as QuoteCard } from "@/components/Resume_Builder/resume_base_decorative_components/quoteCard/QuoteCard";
-export { default as Rail } from "@/components/Resume_Builder/resume_base_decorative_components/rail/Rail";
-export { default as WavyLines } from "@/components/Resume_Builder/resume_base_decorative_components/wavyLines/WavyLines";
+export { default as Rail, railBorderStyle } from "@/components/Resume_Builder/resume_base_decorative_components/rail/Rail";
+export { default as WavyLines, wavyLinesBackgroundStyle } from "@/components/Resume_Builder/resume_base_decorative_components/wavyLines/WavyLines";
 export { default as RailSectionHeading, RAIL_INDENT } from "@/components/Resume_Builder/resume_base_decorative_components/railSectionHeading/RailSectionHeading";
 export { default as SectionPill } from "@/components/Resume_Builder/resume_base_decorative_components/sectionPill/SectionPill";
 export { default as FlourishHeading } from "@/components/Resume_Builder/resume_base_decorative_components/flourishHeading/FlourishHeading";

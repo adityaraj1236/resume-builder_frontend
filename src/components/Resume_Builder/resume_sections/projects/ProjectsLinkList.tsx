@@ -55,16 +55,21 @@ export default function ProjectsLinkList({
             : [];
 
           return (
-            <div key={index} style={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+            // No breakInside:avoid on the entry. It used to be atomic, so a long
+            // description pushed the WHOLE project to the next page rather than
+            // letting the text continue there, leaving a large empty band behind.
+            // The name/link row below carries breakAfter:avoid instead, so a break can
+            // only fall inside the description - never between a project and its title.
+            <div key={index}>
               {descriptionAsBullets ? (
-                <>
+                <div style={{ breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
                   <Text tokens={tokens} as="div" bold dataField={`entries.${index}.name`}>
                     {entry.name}
                   </Text>
                   <Link tokens={tokens} href={entry.link} dataField={`entries.${index}.link`} showIcon />
-                </>
+                </div>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: tokens.spacing.itemGap * 0.6 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: tokens.spacing.itemGap * 0.6, breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
                   <Text tokens={tokens} as="div" bold dataField={`entries.${index}.name`}>
                     {entry.name}
                   </Text>
@@ -100,8 +105,10 @@ export default function ProjectsLinkList({
                   <Text tokens={tokens} as="div" size="small" color={textColor} dataField={`entries.${index}.description`} style={{ marginTop: 2 }}>
                     {entry.description}
                   </Text>
+                  {/* breakBefore:avoid keeps the Tech Stack line with the tail of the
+                      description rather than letting it start a page on its own. */}
                   {entry.tech_stack.length > 0 ? (
-                    <Text tokens={tokens} as="div" size="small" color="accent" italic style={{ marginTop: 3 }}>
+                    <Text tokens={tokens} as="div" size="small" color="accent" italic style={{ marginTop: 3, breakInside: "avoid", pageBreakInside: "avoid", breakBefore: "avoid", pageBreakBefore: "avoid" }}>
                       {techStackLabel} <span data-field={`entries.${index}.tech_stack`} style={{ color: tokens[textColor] }}>{entry.tech_stack.join(", ")}</span>
                     </Text>
                   ) : null}

@@ -145,40 +145,69 @@ export default function EntryExperience({
   // under the icon's own center instead of under the marker column's left edge.
   const markerColumnWidth = 22;
 
+  // The timeline rail, drawn as a BACKGROUND GRADIENT on this container rather than as
+  // an absolutely-positioned child.
+  //
+  // It was an absolute element, which meant it lived in exactly ONE fragment: when
+  // Paged.js split the experience list, the rail stayed with the first page and
+  // continuation pages showed markers with no line joining them. A background is
+  // painted on every fragment of a split element, so the line now survives pagination.
+  // (Same swap as railBorderStyle() in Rail.tsx and wavyLinesBackgroundStyle().)
+  //
+  // A gradient is used instead of a border because a border would sit on the box's own
+  // edge and consume width; a gradient paints at an arbitrary offset and takes none.
+  // The stripe is centred on the marker column's midpoint, exactly where the old
+  // absolute element sat.
+  const railInset = 5 + markerColumnWidth / 2;
+  const railCenter = markerColumnWidth / 2;
+  const railStyle: React.CSSProperties =
+    showMarker && entries.length > 1
+      ? {
+          backgroundImage: `linear-gradient(to right, transparent ${railCenter - 1}px, ${tokens.accent} ${railCenter - 1}px, ${tokens.accent} ${railCenter + 1}px, transparent ${railCenter + 1}px)`,
+          backgroundPosition: `0 ${railInset}px`,
+          backgroundSize: `100% calc(100% - ${railInset * 2}px)`,
+          backgroundRepeat: "no-repeat",
+        }
+      : {};
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: tokens.spacing.itemGap, position: showMarker ? "relative" : undefined }}>
-      {/* One continuous rail behind every marker, instead of a separate line
-          fragment per entry - a per-entry line can never cross the gap between
-          rows, which left a visible break at every dot. Runs from the center of
-          the first marker to the center of the last, so it always touches every
-          dot regardless of how tall each entry's own content is. */}
-      {showMarker && entries.length > 1 ? (
-        <div
-          style={{
-            position: "absolute",
-            top: 5 + markerColumnWidth / 2,
-            bottom: 5 + markerColumnWidth / 2,
-            left: markerColumnWidth / 2,
-            width: 2,
-            marginLeft: -1,
-            background: tokens.accent,
-          }}
-        />
-      ) : null}
+    // Block flow, not a flex column: a flex item is fragmented as one opaque box, so
+    // entries in a flex container cannot split across pages. Each entry carries its own
+    // marginTop in place of the container's former `gap`.
+    <div style={{ position: showMarker ? "relative" : undefined, ...railStyle }}>
       {entries.map((entry, index) => {
         const showBullets = !hideBulletsWhenEmpty || entry.bullets.length > 0;
         const showAchievementsLabel = achievementsLabel !== "none" && showBullets;
 
         const body = (
-          <div style={{ flex: showMarker ? 1 : undefined }}>
-            <CompanyBlock tokens={tokens} entry={entry} index={index} layout={companyLayout} />
+          // No flex sizing: the marker layout is an indented block now, so the body is
+          // simply normal flow filling the column.
+          <div>
+            {/* Role/company/date/label are one unbreakable unit glued to whatever
+                follows, so a page break can never land between an entry's title and
+                its first bullet. The entry as a whole stays splittable (see the
+                wrapper below), so only the bullets that overflow move to the next
+                page - the entry's heading is not dragged along with them. */}
+            <div style={{ breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+              <CompanyBlock tokens={tokens} entry={entry} index={index} layout={companyLayout} />
 
-            {companyLayout === "role-then-company-date-row" ? (
-              <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: tokens.spacing.itemGap * 0.6 }}>
-                <Text tokens={tokens} as="span" variant="minor" color="foreground" dataField={entryField(index, "company")}>
-                  {entry.company}
-                  {showLocation && entry.location ? <span data-field={entryField(index, "location")}> · {entry.location}</span> : null}
-                </Text>
+              {companyLayout === "role-then-company-date-row" ? (
+                <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: tokens.spacing.itemGap * 0.6 }}>
+                  <Text tokens={tokens} as="span" variant="minor" color="foreground" dataField={entryField(index, "company")}>
+                    {entry.company}
+                    {showLocation && entry.location ? <span data-field={entryField(index, "location")}> · {entry.location}</span> : null}
+                  </Text>
+                  <DateRange
+                    tokens={tokens}
+                    startDate={entry.start_date}
+                    endDate={entry.end_date}
+                    startField={entryField(index, "start_date")}
+                    endField={entryField(index, "end_date")}
+                    color={dateColor}
+                    showPresent
+                  />
+                </div>
+              ) : (
                 <DateRange
                   tokens={tokens}
                   startDate={entry.start_date}
@@ -188,48 +217,54 @@ export default function EntryExperience({
                   color={dateColor}
                   showPresent
                 />
-              </div>
-            ) : (
-              <DateRange
-                tokens={tokens}
-                startDate={entry.start_date}
-                endDate={entry.end_date}
-                startField={entryField(index, "start_date")}
-                endField={entryField(index, "end_date")}
-                color={dateColor}
-                showPresent
-              />
-            )}
+              )}
 
-            {showAchievementsLabel ? (
-              <Text
-                tokens={tokens}
-                as="div"
-                size="small"
-                color="accent"
-                italic={achievementsLabel === "italic-accent"}
-                bold={achievementsLabel === "bold-uppercase-accent"}
-                uppercase={achievementsLabel === "bold-uppercase-accent"}
-                style={{ marginTop: tokens.spacing.itemGap * 0.4, marginBottom: 2 }}
-              >
-                Achievements
-              </Text>
-            ) : null}
+              {showAchievementsLabel ? (
+                <Text
+                  tokens={tokens}
+                  as="div"
+                  size="small"
+                  color="accent"
+                  italic={achievementsLabel === "italic-accent"}
+                  bold={achievementsLabel === "bold-uppercase-accent"}
+                  uppercase={achievementsLabel === "bold-uppercase-accent"}
+                  style={{ marginTop: tokens.spacing.itemGap * 0.4, marginBottom: 2 }}
+                >
+                  Achievements
+                </Text>
+              ) : null}
+            </div>
             {showBullets ? <BulletList tokens={tokens} items={entry.bullets} dataFieldPrefix={entryField(index, "bullets")} /> : null}
           </div>
         );
 
+        // No breakInside:avoid on the entry wrapper. It used to be atomic, which made
+        // Paged.js move a WHOLE entry to the next page the moment one extra bullet
+        // pushed it past the space remaining - leaving a large empty band behind.
+        // The entry may now split; the header block above keeps the role/company/date
+        // together and glued to the first bullet, so a split only ever falls BETWEEN
+        // bullets, which is the normal way a long entry continues onto a new page.
+        const entryGap = index > 0 ? tokens.spacing.itemGap : 0;
+
         if (!showMarker) {
           return (
-            <div key={index} style={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+            <div key={index} style={{ marginTop: entryGap }}>
               {body}
             </div>
           );
         }
 
+        // An INDENTED BLOCK with the marker absolutely positioned into the reserved
+        // gutter - not a flex row. A flex row cannot split, so a long entry could not
+        // continue onto the next page; indenting leaves the body in normal flow at
+        // full width, which a continuation fragment inherits correctly.
+        const markerGutter = markerColumnWidth + tokens.spacing.itemGap * 0.7;
         return (
-          <div key={index} style={{ display: "flex", gap: tokens.spacing.itemGap * 0.7, breakInside: "avoid", pageBreakInside: "avoid" }}>
-            <div style={{ width: markerColumnWidth, flexShrink: 0, paddingTop: 5, display: "flex", justifyContent: "center", position: "relative", zIndex: 1 }}>
+          <div key={index} style={{ position: "relative", paddingLeft: markerGutter, marginTop: entryGap }}>
+            {/* Belongs to the entry's start, so it is painted once, on whichever page
+                the entry begins - the rail behind it is the container's background and
+                repeats on every page by itself. */}
+            <div style={{ position: "absolute", left: 0, top: 5, width: markerColumnWidth, display: "flex", justifyContent: "center", zIndex: 1 }}>
               <Marker tokens={tokens} filled />
             </div>
             {body}

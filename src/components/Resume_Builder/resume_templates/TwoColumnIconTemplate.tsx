@@ -29,11 +29,22 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
       <div style={{ marginTop: tokens.spacing.sectionGap }}>
         <TwoColumnLayout
           tokens={tokens}
-          leftWidth="52%"
-          gap={tokens.spacing.sectionGap}
+          /* Widening the left column pushes the right one further right. Kept as a
+             percentage so both columns still scale with the page rather than being
+             pinned to a fixed pixel split. */
+          leftWidth="54%"
+          /* Wider gutter between the two columns than the section rhythm would give,
+             so the left column's bullets and the right column's badges do not read as
+             one continuous block. */
+          gap={tokens.spacing.sectionGap * 1.8}
           rightAlign={false}
           left={
-            <div style={{ display: "flex", flexDirection: "column", gap: tokens.spacing.sectionGap }}>
+            // Block flow, not a flex column. A flex item is fragmented as one opaque
+            // box, so a flex container's children cannot split across pages - Paged.js
+            // was forced to break at a lower level, which stranded bullets on page 2
+            // with no section heading above them. Each section carries its own
+            // marginTop in place of the container's `gap`.
+            <div>
               {/* Experience */}
               {experience && experience.entries.length > 0 ? (
                 <div data-section-key="experience">
@@ -54,7 +65,7 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Education */}
               {education && education.entries.length > 0 ? (
-                <div data-section-key="education">
+                <div data-section-key="education" style={{ marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<GraduationCap size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {education.title}
                   </RailSectionHeading>
@@ -66,12 +77,16 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
             </div>
           }
           right={
-            <div style={{ display: "flex", flexDirection: "column", gap: tokens.spacing.sectionGap }}>
+            // Block flow, not a flex column - same reason as the left column above.
+            <div>
               {/* Skills */}
               {skills && skills.categories.length > 0 ? (
-                <div data-section-key="skills" style={{ display: "flex", flexDirection: "column", gap: tokens.spacing.itemGap }}>
+                <div data-section-key="skills">
                   {skills.categories.map((category, index) => (
-                    <div key={index} style={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+                    // A single skill category is small, so it stays atomic - but the
+                    // categories are no longer flex siblings, so the LIST of them can
+                    // break between categories.
+                    <div key={index} style={{ marginTop: index > 0 ? tokens.spacing.itemGap : 0, breakInside: "avoid", pageBreakInside: "avoid" }}>
                       <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<Tag size={12} strokeWidth={2} color="white" />} tokens={tokens}>
                         <span data-field={`categories.${index}.category_name`}>{category.category_name}</span>
                       </RailSectionHeading>
@@ -89,7 +104,7 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Projects */}
               {projects && projects.entries.length > 0 ? (
-                <div data-section-key="projects">
+                <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<ImageIconLucide size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {projects.title}
                   </RailSectionHeading>
@@ -101,7 +116,7 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Certifications */}
               {certifications && certifications.entries.length > 0 ? (
-                <div data-section-key="certifications">
+                <div data-section-key="certifications" style={{ marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<Award size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {certifications.title}
                   </RailSectionHeading>
@@ -130,7 +145,7 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Publications */}
               {publications && publications.entries.length > 0 ? (
-                <div data-section-key="publications">
+                <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<BookOpen size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {publications.title}
                   </RailSectionHeading>

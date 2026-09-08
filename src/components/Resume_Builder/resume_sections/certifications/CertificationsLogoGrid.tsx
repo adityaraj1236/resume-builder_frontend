@@ -9,6 +9,10 @@ import IconUpload from "@/components/Resume_Builder/resume_base_components/iconU
 export const designId = "certifications-logo-grid-v1";
 export const designName = "Logo Grid";
 
+// Entries per row. Fixed rather than left to flex wrapping so the code can tell which
+// entry starts a row - see the grid comment below.
+const COLUMNS = 3;
+
 type Content = CertificationsContent;
 export type SectionConfig = BaseSectionConfig<Content>;
 
@@ -43,15 +47,20 @@ export default function CertificationsLogoGrid({ config, showHeading = true }: C
   return (
     <div>
       {showHeading ? <Heading tokens={tokens}>Certifications</Heading> : null}
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
+      {/* A fixed 3-up grid rather than a wrapping flex row. Wrapping was dynamic, so
+          nothing could know WHICH entry started a new row - the divider rule
+          (index > 0) then drew a borderLeft on the first item of every wrapped row,
+          leaving a stray line with nothing beside it. With a fixed column count the
+          row position is just index % COLUMNS, so the divider can be suppressed
+          exactly at each row start. rowGap also separates the rows, which a plain
+          wrapping row had no way to do. */}
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${COLUMNS}, minmax(0, 1fr))`, rowGap: tokens.spacing.sectionGap }}>
         {entries.map((entry, index) => (
           <div
             key={index}
             style={{
-              flex: "1 1 140px",
-              minWidth: 130,
               boxSizing: "border-box",
-              borderLeft: index > 0 ? `1px solid ${tokens.surface.border}` : undefined,
+              borderLeft: index % COLUMNS !== 0 ? `1px solid ${tokens.surface.border}` : undefined,
               padding: `0 ${tokens.spacing.itemGap}px`,
               breakInside: "avoid",
               pageBreakInside: "avoid",
