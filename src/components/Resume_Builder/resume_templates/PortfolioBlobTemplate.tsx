@@ -39,9 +39,8 @@ type PortfolioBlobTemplateProps = {
   theme: string | ThemeTokens;
 };
 
-// Builds the sidebar (left) and main-content (right) halves - shared by the default
-// render below and by getSplitSections, which PaginatedResume calls to paginate the
-// sidebar and main column independently across A4 pages.
+// Builds the sidebar (left) and main-content (right) halves, composed by the default
+// render below.
 function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProps) {
   const tokens = getThemeTokens(theme);
   const { header, summary, experience, education, skills, projects, certifications, publications } = getTypedSections(sectionsByType);
@@ -254,14 +253,6 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
   );
 
   return { left, right };
-}
-
-// Used by PaginatedResume to paginate the sidebar and main column independently.
-// `leftBackground`/`leftWidthRatio` mirror the sidebar's own panel and width below so
-// paginated pages keep the full-height panel and the same 30/70 proportions.
-export function getSplitSections(props: PortfolioBlobTemplateProps) {
-  const tokens = getThemeTokens(props.theme);
-  return { ...buildSplitSections(props), leftBackground: tokens.surface.card, leftWidthRatio: 0.3 };
 }
 
 export default function PortfolioBlobTemplate({ sectionsByType, theme }: PortfolioBlobTemplateProps) {

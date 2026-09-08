@@ -12,9 +12,8 @@ type IconRailTemplateProps = {
   theme: string | ThemeTokens;
 };
 
-// Builds the sidebar (left) and main-content (right) halves - shared by the default
-// render below and by getSplitSections, which PaginatedResume calls to paginate the
-// sidebar and main column independently across A4 pages.
+// Builds the sidebar (left) and main-content (right) halves, composed by the default
+// render below.
 function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
   const tokens = getThemeTokens(theme);
   const { header, summary, experience, education, skills, projects, certifications, publications, achievements } = getTypedSections(sectionsByType);
@@ -228,14 +227,6 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
   );
 
   return { left, right };
-}
-
-// Used by PaginatedResume to paginate the sidebar and main column independently.
-// `leftBackground`/`leftWidthRatio` mirror the dark sidebar panel and width below so
-// paginated pages keep the full-height panel and the same 32/68 proportions.
-export function getSplitSections(props: IconRailTemplateProps) {
-  const tokens = getThemeTokens(props.theme);
-  return { ...buildSplitSections(props), leftBackground: tokens.foreground, leftWidthRatio: 0.32 };
 }
 
 export default function IconRailTemplate({ sectionsByType, theme }: IconRailTemplateProps) {

@@ -21,44 +21,12 @@ import AchievementsBullets from "@/components/Resume_Builder/resume_sections/ach
 
 import LeftPanel from "@/components/ResumeContentEditor/LeftPanel";
 import ThemePicker from "@/components/ThemePicker";
-import * as TwoColumnIconTemplateModule from "@/components/Resume_Builder/resume_templates/TwoColumnIconTemplate";
-import * as StudentSidebarTemplateModule from "@/components/Resume_Builder/resume_templates/StudentSidebarTemplate";
-import * as PortfolioBlobTemplateModule from "@/components/Resume_Builder/resume_templates/PortfolioBlobTemplate";
-import * as IconRailTemplateModule from "@/components/Resume_Builder/resume_templates/IconRailTemplate";
+import TwoColumnIconTemplate from "@/components/Resume_Builder/resume_templates/TwoColumnIconTemplate";
+import StudentSidebarTemplate from "@/components/Resume_Builder/resume_templates/StudentSidebarTemplate";
+import PortfolioBlobTemplate from "@/components/Resume_Builder/resume_templates/PortfolioBlobTemplate";
+import IconRailTemplate from "@/components/Resume_Builder/resume_templates/IconRailTemplate";
 import CenteredTimelineTemplate from "@/components/Resume_Builder/resume_templates/CenteredTimelineTemplate";
 import IconLineTemplate from "@/components/Resume_Builder/resume_templates/IconLineTemplate";
-import PaginatedResume from "@/components/Resume_Builder/pagination/PaginatedResume";
-
-const TwoColumnIconTemplate = TwoColumnIconTemplateModule.default;
-const StudentSidebarTemplate = StudentSidebarTemplateModule.default;
-const PortfolioBlobTemplate = PortfolioBlobTemplateModule.default;
-const IconRailTemplate = IconRailTemplateModule.default;
-
-// Templates whose two halves flow independently across A4 pages (sidebar/main or
-// left/right columns) each export getSplitSections({ sectionsByType, theme }) =>
-// { left, right, header? } alongside their default whole-page component (`header`,
-// when present, renders once above both columns on page 1 only - e.g.
-// TwoColumnIconTemplate's name/contact row, which isn't part of either column).
-// Templates without an entry here (CenteredTimelineTemplate, IconLineTemplate) are
-// genuinely single-column and paginate as one strip via PaginatedResume's fallback
-// mode.
-type SplitSectionsFn = (props: { sectionsByType: Record<string, ResumeSection>; theme: string | ThemeTokens }) => {
-  left: React.ReactNode;
-  right: React.ReactNode;
-  header?: React.ReactNode;
-  // Sidebar templates declare their own panel colour and column split so the
-  // paginated pages keep the same full-height panel and proportions as their
-  // single-page layout.
-  leftBackground?: string;
-  leftWidthRatio?: number;
-};
-
-const SPLIT_SECTIONS: Record<string, SplitSectionsFn> = {
-  "two-column-icon-v1": TwoColumnIconTemplateModule.getSplitSections,
-  "student-sidebar-v1": StudentSidebarTemplateModule.getSplitSections,
-  "portfolio-blob-v1": PortfolioBlobTemplateModule.getSplitSections,
-  "icon-rail-v1": IconRailTemplateModule.getSplitSections,
-};
 
 // Whole-page templates render every section themselves (mirrors a pitch deck slide
 // being one self-contained component) instead of stacking independently-swappable
@@ -274,57 +242,41 @@ export default function ResumeRenderer({ initialDocument, designRegistry }: Resu
           matchHeight={resumeHeight}
         />
 
-        <div style={{ flex: 1, minWidth: 0 }} ref={resumePageRef}>
-          {(() => {
-            const pageBackground = !usesCustomShell ? themeTokens.background : "#ffffff";
-            const pageColor = !usesCustomShell ? themeTokens.foreground : "#1a1a1a";
-            const getSplitSections = SPLIT_SECTIONS[workingDocument.template_id];
-
-            if (getSplitSections) {
-              const { left, right, header, leftBackground, leftWidthRatio } = getSplitSections({ sectionsByType, theme: workingDocument.theme });
-              return (
-                <PaginatedResume
-                  tokens={themeTokens}
-                  background={pageBackground}
-                  color={pageColor}
-                  left={left}
-                  right={right}
-                  header={header}
-                  leftBackground={leftBackground}
-                  leftWidthRatio={leftWidthRatio}
-                />
-              );
-            }
-
-            if (PageTemplateComponent) {
-              return (
-                <PaginatedResume tokens={themeTokens} background={pageBackground} color={pageColor}>
-                  <PageTemplateComponent sectionsByType={sectionsByType} theme={workingDocument.theme} />
-                </PaginatedResume>
-              );
-            }
-
-            return (
-              <PaginatedResume tokens={themeTokens} background={pageBackground} color={pageColor}>
-                <div style={{ display: "flex", flexDirection: "column", gap: themeTokens.spacing.sectionGap }}>
-                  {materialized.sections.map((section) => {
-                    const Component = SECTION_COMPONENTS[section.designId];
-                    return (
-                      <div key={section.sectionKey} className="resume-section" data-section-key={section.sectionKey}>
-                        {Component ? (
-                          <Component config={section.config} />
-                        ) : (
-                          <div style={{ color: "#dc2626", fontSize: 13 }}>
-                            No component registered for design_id: {section.designId}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </PaginatedResume>
-            );
-          })()}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            id="resume-page"
+            ref={resumePageRef}
+            style={{
+              background: !usesCustomShell ? themeTokens.background : "#ffffff",
+              color: !usesCustomShell ? themeTokens.foreground : "#1a1a1a",
+              padding: !usesCustomShell ? themeTokens.spacing.pagePad : 0,
+              maxWidth: 820,
+              margin: "0 auto",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+              overflow: "hidden",
+            }}
+          >
+            {PageTemplateComponent ? (
+              <PageTemplateComponent sectionsByType={sectionsByType} theme={workingDocument.theme} />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: themeTokens.spacing.sectionGap }}>
+                {materialized.sections.map((section) => {
+                  const Component = SECTION_COMPONENTS[section.designId];
+                  return (
+                    <div key={section.sectionKey} className="resume-section" data-section-key={section.sectionKey}>
+                      {Component ? (
+                        <Component config={section.config} />
+                      ) : (
+                        <div style={{ color: "#dc2626", fontSize: 13 }}>
+                          No component registered for design_id: {section.designId}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

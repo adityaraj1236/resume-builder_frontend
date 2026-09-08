@@ -14,9 +14,8 @@ type StudentSidebarTemplateProps = {
   theme: string | ThemeTokens;
 };
 
-// Builds the sidebar (left) and main-content (right) halves - shared by the default
-// render below and by getSplitSections, which PaginatedResume calls to paginate the
-// sidebar and main column independently across A4 pages.
+// Builds the sidebar (left) and main-content (right) halves, composed by the default
+// render below.
 function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplateProps) {
   const tokens = getThemeTokens(theme);
   const { header, summary, experience, education, skills, projects, certifications, publications } = getTypedSections(sectionsByType);
@@ -190,15 +189,6 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
   );
 
   return { left, right };
-}
-
-// Used by PaginatedResume to paginate the sidebar and main column independently.
-// `leftBackground`/`leftWidthRatio` mirror the sidebar's own panel colour and width
-// below, so every paginated page keeps the full-height tinted panel and the same
-// 30/70 proportions the single-page layout has.
-export function getSplitSections(props: StudentSidebarTemplateProps) {
-  const tokens = getThemeTokens(props.theme);
-  return { ...buildSplitSections(props), leftBackground: tokens.surface.card, leftWidthRatio: 0.3 };
 }
 
 export default function StudentSidebarTemplate({ sectionsByType, theme }: StudentSidebarTemplateProps) {
