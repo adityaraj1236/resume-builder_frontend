@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@media print {
+  /* PageFrame already renders each page at exact A4 dimensions with its own theme
+     padding, so the printed page itself needs no extra margin - doubling up here
+     would push PageFrame's fixed-size content past the physical page bounds. */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  /* Each PageFrame IS one physical A4 sheet - force a page break after every one
+     except the last, and drop the on-screen shadow/gap used for the "separate
+     sheets" preview look. */
+  .resume-page-frame {
+    box-shadow: none !important;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .resume-page-frame:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .resume-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
