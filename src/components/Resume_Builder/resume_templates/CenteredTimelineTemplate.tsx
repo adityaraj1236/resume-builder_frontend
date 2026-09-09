@@ -25,9 +25,9 @@ export default function CenteredTimelineTemplate({ sectionsByType, theme }: Cent
   ].filter((row) => row.value);
 
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background }}>
+    <div style={{ display: "block", fontFamily: tokens.font.family, background: tokens.background }}>
       {/* Header */}
-      <div data-section-key="header" style={{ textAlign: "center" }}>
+      <div data-section-key="header" style={{ display: "block", textAlign: "center" }}>
         <Heading tokens={tokens} variant="name" dataField="full_name">
           {header?.full_name}
         </Heading>
@@ -47,14 +47,14 @@ export default function CenteredTimelineTemplate({ sectionsByType, theme }: Cent
 
       {/* Summary */}
       {summary?.summary ? (
-        <div data-section-key="summary" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="summary" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <SummaryParagraph config={{ theme, content: summary }} showMeta={false} />
         </div>
       ) : null}
 
       {/* Experience */}
       {experience && experience.entries.length > 0 ? (
-        <div data-section-key="experience" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="experience" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} dataField="title">{experience.title || "Experience"}</Heading>
           <DateLeftTimelineExperience tokens={tokens} entries={experience.entries} />
         </div>
@@ -62,14 +62,14 @@ export default function CenteredTimelineTemplate({ sectionsByType, theme }: Cent
 
       {/* Achievements */}
       {achievements && achievements.entries.length > 0 ? (
-        <div data-section-key="achievements" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="achievements" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <AchievementsBullets config={{ theme, content: achievements }} />
         </div>
       ) : null}
 
       {/* Projects */}
       {projects && projects.entries.length > 0 ? (
-        <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="projects" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <ProjectsLinkList config={{ theme, content: projects }} linkAsIcon />
         </div>
       ) : null}
@@ -78,13 +78,13 @@ export default function CenteredTimelineTemplate({ sectionsByType, theme }: Cent
       {(skills && skills.categories.length > 0) || (certifications && certifications.entries.length > 0) ? (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: tokens.spacing.sectionGap, marginTop: tokens.spacing.sectionGap }}>
           {skills && skills.categories.length > 0 ? (
-            <div data-section-key="skills">
+            <div data-section-key="skills" style={{ display: "block" }}>
               <SkillsFlatList config={{ theme, content: skills }} />
             </div>
           ) : null}
 
           {certifications && certifications.entries.length > 0 ? (
-            <div data-section-key="certifications">
+            <div data-section-key="certifications" style={{ display: "block" }}>
               <CertificationsList config={{ theme, content: certifications }} bulleted />
             </div>
           ) : null}
@@ -93,14 +93,14 @@ export default function CenteredTimelineTemplate({ sectionsByType, theme }: Cent
 
       {/* Education */}
       {education && education.entries.length > 0 ? (
-        <div data-section-key="education" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="education" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <EducationSimple config={{ theme, content: education }} />
         </div>
       ) : null}
 
       {/* Publications */}
       {publications && publications.entries.length > 0 ? (
-        <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="publications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <PublicationsList config={{ theme, content: publications }} />
         </div>
       ) : null}

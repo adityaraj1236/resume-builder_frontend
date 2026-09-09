@@ -3,6 +3,7 @@ import Text from "@/components/Resume_Builder/resume_base_components/text/Text";
 import DateRange from "@/components/Resume_Builder/resume_base_components/dateRange/DateRange";
 import BulletList from "@/components/Resume_Builder/resume_base_components/bulletList/BulletList";
 import Marker from "@/components/Resume_Builder/resume_base_decorative_components/marker/Marker";
+import { railBorderStyle } from "@/components/Resume_Builder/resume_base_decorative_components/rail/Rail";
 import type { ExperienceEntry } from "@/types/resume";
 import type { ThemeTokens } from "@/types/resume_theme";
 import type { ExperienceLayoutProps } from "@/components/Resume_Builder/resume_sections/experience/types";
@@ -162,19 +163,14 @@ export default function EntryExperience({
   const railCenter = markerColumnWidth / 2;
   const railStyle: React.CSSProperties =
     showMarker && entries.length > 1
-      ? {
-          backgroundImage: `linear-gradient(to right, transparent ${railCenter - 1}px, ${tokens.accent} ${railCenter - 1}px, ${tokens.accent} ${railCenter + 1}px, transparent ${railCenter + 1}px)`,
-          backgroundPosition: `0 ${railInset}px`,
-          backgroundSize: `100% calc(100% - ${railInset * 2}px)`,
-          backgroundRepeat: "no-repeat",
-        }
+      ? railBorderStyle(tokens, railCenter - 1, tokens.accent, railInset)
       : {};
 
   return (
     // Block flow, not a flex column: a flex item is fragmented as one opaque box, so
     // entries in a flex container cannot split across pages. Each entry carries its own
     // marginTop in place of the container's former `gap`.
-    <div style={{ position: showMarker ? "relative" : undefined, ...railStyle }}>
+    <div data-resume-rail={showMarker && entries.length > 1 ? "" : undefined} style={{ position: showMarker ? "relative" : undefined, ...railStyle }}>
       {entries.map((entry, index) => {
         const showBullets = !hideBulletsWhenEmpty || entry.bullets.length > 0;
         const showAchievementsLabel = achievementsLabel !== "none" && showBullets;

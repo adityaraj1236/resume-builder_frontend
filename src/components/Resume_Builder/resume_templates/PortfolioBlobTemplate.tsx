@@ -1,5 +1,7 @@
 "use client";
 
+import { PAGE_MARGIN_PX, COLUMN_GAP_PX } from "../pagedjs_poc/pageMargins";
+
 import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Photo, Text, ContactGroup, BulletList, SkillWithLevel, IconUpload, Blob, DotGrid, QuoteCard, railBorderStyle, wavyLinesBackgroundStyle, RailSectionHeading, RAIL_INDENT, ProjectsLinkList, EntryExperience, EducationSimple, CertificationsLogoGrid, PublicationsList, SummaryParagraph, GraduationCap, Award, FolderOpen, BadgeCheck, BookOpen } from "@/components/Resume_Builder/resume_templates_imports";
 
 export const templateId = "portfolio-blob-v1";
@@ -15,7 +17,7 @@ function ToolDotIcon({ color }: { color: string }) {
 
 function SidebarHeading({ tokens, children }: { tokens: ThemeTokens; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: tokens.spacing.itemGap, breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+    <div style={{ display: "block", marginBottom: tokens.spacing.itemGap, breakAfter: "avoid", pageBreakAfter: "avoid" }}>
       <Text tokens={tokens} as="div" size="small" color="foreground" bold uppercase style={{ letterSpacing: 1 }}>
         {children}
       </Text>
@@ -74,10 +76,11 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
     <div
       data-panel-decoration="wavy-lines"
       style={{
+        display: "block",
         boxSizing: "border-box",
         background: tokens.surface.card,
         borderRight: `1px solid ${tokens.surface.border}`,
-        padding: "32px 22px 32px 24px",
+        padding: `0 22px 0 ${PAGE_MARGIN_PX}px`,
         ...wavyLinesBackgroundStyle({ tokens }),
       }}
     >
@@ -104,7 +107,7 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
       ) : null}
 
       {/* Contact */}
-      <div style={{ marginTop: tokens.spacing.sectionGap }}>
+      <div style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
         <SidebarHeading tokens={tokens}>Contact</SidebarHeading>
         <ContactGroup
           tokens={tokens}
@@ -123,7 +126,7 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
 
       {/* Soft skills */}
       {softSkillsCategory && softSkillsCategory.skills.length > 0 ? (
-        <div data-section-key="skills" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="skills" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <SidebarHeading tokens={tokens}>
             <span data-field="categories.0.category_name">{softSkillsCategory.category_name}</span>
           </SidebarHeading>
@@ -145,7 +148,7 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
 
       {/* Icon-grid skills */}
       {iconGridCategory && iconGridCategory.skills.length > 0 ? (
-        <div style={{ marginTop: tokens.spacing.sectionGap, breakInside: "avoid", pageBreakInside: "avoid" }}>
+        <div style={{ display: "block", marginTop: tokens.spacing.sectionGap, breakInside: "avoid", pageBreakInside: "avoid" }}>
           <SidebarHeading tokens={tokens}>
             <span data-field="categories.1.category_name">{iconGridCategory.category_name}</span>
           </SidebarHeading>
@@ -170,7 +173,7 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
           // No breakInside:avoid: a long category should let its bullets continue on
           // the next page rather than moving the whole category there. SidebarHeading
           // already carries breakAfter:avoid, so the heading stays with its first item.
-          <div key={realIndex} style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div key={realIndex} style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <SidebarHeading tokens={tokens}>
               <span data-field={`categories.${realIndex}.category_name`}>{category.category_name}</span>
             </SidebarHeading>
@@ -189,13 +192,10 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
   );
 
   const right = (
-    // The left inset is the column's own, not the row's. It used to be 0 and rely on
-    // the parent flex `gap` - but that gap is dropped when the columns are composed
-    // onto a paginated sheet (a tinted sidebar's panel edge is the divider there),
-    // which left this text flush against the panel.
-    <div style={{ padding: "32px 36px 32px 40px", boxSizing: "border-box" }}>
+    // The row owns the column gap; this wrapper supplies only the outer right margin.
+    <div style={{ display: "block", padding: `0 ${PAGE_MARGIN_PX}px 0 0`, boxSizing: "border-box" }}>
       {/* Header */}
-      <div data-section-key="header">
+      <div data-section-key="header" style={{ display: "block" }}>
         <div data-field="full_name" style={{ fontFamily: tokens.font.family, fontWeight: tokens.font.headingWeight, fontSize: tokens.font.sizes.name, lineHeight: tokens.font.lineHeights.heading }}>
           <span style={{ color: tokens.foreground }}>{firstName}</span>
           {restOfName ? <span style={{ color: tokens.accent }}> {restOfName}</span> : null}
@@ -222,15 +222,15 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
           positioned <Rail/>, so it repeats on every fragment when the column is
           split across pages - an absolute element lives in ONE fragment only and
           vanishes from continuation pages. Same swap IconRailTemplate already made. */}
-      <div style={{ position: "relative", marginTop: tokens.spacing.sectionGap, ...railBorderStyle(tokens) }}>
+      <div data-resume-rail style={{ display: "block", position: "relative", marginTop: tokens.spacing.sectionGap, ...railBorderStyle(tokens) }}>
 
         {/* Education */}
         {education && education.entries.length > 0 ? (
-          <div data-section-key="education">
+          <div data-section-key="education" style={{ display: "block" }}>
             <RailSectionHeading tokens={tokens} icon={<GraduationCap size={14} strokeWidth={2} color={tokens.background} />} underline="dot-rule">
               <span data-field="title">{education.title || "Education"}</span>
             </RailSectionHeading>
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <EducationSimple config={{ theme, content: education }} showHeading={false} layout="stacked-with-courses" courseLabel="Relevant Coursework:" />
             </div>
           </div>
@@ -238,11 +238,11 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
 
         {/* Experience */}
         {experience && experience.entries.length > 0 ? (
-          <div data-section-key="experience" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="experience" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<Award size={14} strokeWidth={2} color={tokens.background} />} underline="dot-rule">
               <span data-field="title">{experience.title || "Experience"}</span>
             </RailSectionHeading>
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <EntryExperience tokens={tokens} entries={experience.entries} companyLayout="role-company-inline" dateColor="accent" />
             </div>
           </div>
@@ -250,11 +250,11 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
 
         {/* Projects */}
         {projects && projects.entries.length > 0 ? (
-          <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="projects" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<FolderOpen size={14} strokeWidth={2} color={tokens.background} />} underline="dot-rule">
               <span data-field="title">{projects.title || "Projects"}</span>
             </RailSectionHeading>
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <ProjectsLinkList config={{ theme, content: projects }} showHeading={false} techStackLabel="Role:" />
             </div>
           </div>
@@ -262,11 +262,11 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
 
         {/* Certifications */}
         {certifications && certifications.entries.length > 0 ? (
-          <div data-section-key="certifications" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="certifications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<BadgeCheck size={14} strokeWidth={2} color={tokens.background} />} underline="dot-rule">
               <span data-field="title">{certifications.title || "Certificates"}</span>
             </RailSectionHeading>
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <CertificationsLogoGrid config={{ theme, content: certifications }} showHeading={false} />
             </div>
           </div>
@@ -274,11 +274,11 @@ function buildSplitSections({ sectionsByType, theme }: PortfolioBlobTemplateProp
 
         {/* Publications */}
         {publications && publications.entries.length > 0 ? (
-          <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="publications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<BookOpen size={14} strokeWidth={2} color={tokens.background} />} underline="dot-rule">
               <span data-field="title">{publications.title || "Publications"}</span>
             </RailSectionHeading>
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <PublicationsList config={{ theme, content: publications }} showHeading={false} />
             </div>
           </div>
@@ -295,7 +295,7 @@ export default function PortfolioBlobTemplate({ sectionsByType, theme }: Portfol
   const { left, right } = buildSplitSections({ sectionsByType, theme });
 
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: tokens.spacing.sectionGap }}>
+    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: COLUMN_GAP_PX }}>
       <div style={{ flex: "0 0 230px", minWidth: 0 }}>{left}</div>
       <div style={{ flex: "1 1 auto", minWidth: 0 }}>{right}</div>
     </div>

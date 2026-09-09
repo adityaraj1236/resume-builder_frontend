@@ -1,5 +1,7 @@
 "use client";
 
+import { PAGE_MARGIN_PX, COLUMN_GAP_PX } from "../pagedjs_poc/pageMargins";
+
 import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Text, Heading, ContactGroup, SkillWithLevel, railBorderStyle, RailSectionHeading, RAIL_INDENT, SectionPill, ProjectsLinkList, EntryExperience, SummaryParagraph, EntryLinkList, EducationSimple, User, Briefcase, Code2, BookOpen, GraduationCap, FileText, Star } from "@/components/Resume_Builder/resume_templates_imports";
 
 export const templateId = "icon-rail-v1";
@@ -32,7 +34,7 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
   const restOfName = nameTokens.slice(1).join(" ");
 
   const left = (
-    <div style={{ height: "100%", boxSizing: "border-box", background: tokens.foreground, padding: "32px 24px" }}>
+    <div style={{ display: "block", height: "100%", boxSizing: "border-box", background: tokens.foreground, padding: `0 24px 0 ${PAGE_MARGIN_PX}px` }}>
       {/* Name */}
       <div data-field="full_name" style={{ fontFamily: tokens.font.family, fontWeight: tokens.font.headingWeight, fontSize: tokens.font.sizes.name * 0.85, lineHeight: tokens.font.lineHeights.heading }}>
         <span style={{ color: tokens.background }}>{firstName}</span>
@@ -65,7 +67,7 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
       {/* Skills */}
       {flatSkills.length > 0 ? (
-        <div data-section-key="skills" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="skills" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} size="small" color="background" pillDivider pillOnly pillWidth={26} pillHeight={4}>
             <span data-field="title">{skills?.title || "Technical Skills"}</span>
           </Heading>
@@ -79,7 +81,7 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
       {/* Achievements */}
       {achievements && achievements.entries.length > 0 ? (
-        <div data-section-key="achievements" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="achievements" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} size="small" color="background" pillDivider pillOnly pillWidth={26} pillHeight={4}>
             <span data-field="title">{achievements.title || "Achievements"}</span>
           </Heading>
@@ -108,21 +110,21 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
   );
 
   const right = (
-    <div style={{ padding: "12px 16px", boxSizing: "border-box"}}>
+    <div style={{ display: "block", padding: `0 ${PAGE_MARGIN_PX}px 0 0`, boxSizing: "border-box"}}>
       {/* Rail painted as this wrapper's background rather than an absolutely-
           positioned <Rail/>, so it repeats on every fragment when the column is
           split across pages. A background costs no width, so the column keeps its
           full measured size. position:relative stays for SectionPill below. */}
-      <div style={{ position: "relative", ...railBorderStyle(tokens) }}>
+      <div data-resume-rail style={{ display: "block", position: "relative", ...railBorderStyle(tokens) }}>
 
         {/* Summary */}
         {summary?.summary ? (
-          <div data-section-key="summary">
+          <div data-section-key="summary" style={{ display: "block" }}>
             <RailSectionHeading tokens={tokens} icon={<User size={14} strokeWidth={2} color={tokens.background} />}>
               <span data-field="title">{summary.title || "Professional Summary"}</span>
             </RailSectionHeading>
             <SectionPill tokens={tokens} indent={RAIL_INDENT} />
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <SummaryParagraph config={{ theme, content: summary }} showHeading={false} showMeta={false} />
             </div>
           </div>
@@ -130,12 +132,12 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
         {/* Experience */}
         {experience && experience.entries.length > 0 ? (
-          <div data-section-key="experience" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="experience" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<Briefcase size={14} strokeWidth={2} color={tokens.background} />}>
               <span data-field="title">{experience.title || "Work Experience"}</span>
             </RailSectionHeading>
             <SectionPill tokens={tokens} indent={RAIL_INDENT} />
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <EntryExperience tokens={tokens} entries={experience.entries} companyLayout="role-then-company-date-row" showLocation />
             </div>
           </div>
@@ -143,12 +145,12 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
         {/* Projects */}
         {projects && projects.entries.length > 0 ? (
-          <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="projects" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<Code2 size={14} strokeWidth={2} color={tokens.background} />}>
               <span data-field="title">{projects.title || "Projects"}</span>
             </RailSectionHeading>
             <SectionPill tokens={tokens} indent={RAIL_INDENT} />
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <ProjectsLinkList config={{ theme, content: projects }} showHeading={false} />
             </div>
           </div>
@@ -156,12 +158,12 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
         {/* Certifications */}
         {certifications && certifications.entries.length > 0 ? (
-          <div data-section-key="certifications" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="certifications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<BookOpen size={14} strokeWidth={2} color={tokens.background} />}>
               <span data-field="title">{certifications.title || "Courses & Trainings"}</span>
             </RailSectionHeading>
             <SectionPill tokens={tokens} indent={RAIL_INDENT} />
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <EntryLinkList
                 tokens={tokens}
                 heading="Courses & Trainings"
@@ -185,12 +187,12 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
         {/* Education */}
         {education && education.entries.length > 0 ? (
-          <div data-section-key="education" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="education" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<GraduationCap size={14} strokeWidth={2} color={tokens.background} />}>
               <span data-field="title">{education.title || "Education"}</span>
             </RailSectionHeading>
             <SectionPill tokens={tokens} indent={RAIL_INDENT} />
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <EducationSimple config={{ theme, content: education }} showHeading={false} layout="stacked-with-courses" dateColor="subtext" showCourses={false} />
             </div>
           </div>
@@ -198,12 +200,12 @@ function buildSplitSections({ sectionsByType, theme }: IconRailTemplateProps) {
 
         {/* Publications */}
         {publications && publications.entries.length > 0 ? (
-          <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="publications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             <RailSectionHeading tokens={tokens} icon={<FileText size={14} strokeWidth={2} color={tokens.background} />}>
               <span data-field="title">{publications.title || "Publications"}</span>
             </RailSectionHeading>
             <SectionPill tokens={tokens} indent={RAIL_INDENT} />
-            <div style={{ paddingLeft: RAIL_INDENT }}>
+            <div style={{ display: "block", paddingLeft: RAIL_INDENT }}>
               <EntryLinkList
                 tokens={tokens}
                 heading="Publications"
@@ -236,7 +238,7 @@ export default function IconRailTemplate({ sectionsByType, theme }: IconRailTemp
   const { left, right } = buildSplitSections({ sectionsByType, theme });
 
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
+    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: COLUMN_GAP_PX, flexWrap: "wrap" }}>
       <div style={{ width: "32%", minWidth: 230, flexShrink: 0 }}>{left}</div>
       <div style={{ flex: "1 1 340px", minWidth: 0 }}>{right}</div>
     </div>

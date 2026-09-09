@@ -66,49 +66,15 @@ body {
      Content that does not fit should now be visible, so it can be fixed. */
 }
 
-/* No padding-top here: .poc-page now supplies the sheet's top spacing for every
-   page. The header previously carried its own because the sheet had none, which
-   made page 1 look correct while pages 2+ sat flush against the edge. Keeping both
-   would double the gap on page 1.
-
-   Left unscoped (not under .pagedjs-target) so the off-screen probe that measures
-   the header's height - it attaches to document.body - resolves the same styles as
-   the rendered header, keeping the measured and rendered heights in agreement. */
-/* The header sits outside both column slots, so it needs its own inset - it used to
-   inherit the sheet's, but that moved onto .poc-col so a tinted sidebar could bleed
-   to the page edge. Without this the header renders flush against the top-left
-   corner. Matches .poc-col's own padding so the header lines up with the columns
-   beneath it.
-
-   Left unscoped (not under .pagedjs-target) so the off-screen probe that measures
-   the header's height resolves the same styles as the rendered header. */
-/* Drawn OVER the band the columns already reserved for it (each column run was
-   fragmented with a spacer of exactly this height). Stacking it above the columns
-   instead would reserve the space twice - once in the spacer, once here - which is
-   what left a tall empty gap at the foot of page 1 while every Paged.js page
-   reported unused=0.
-
-   Left unscoped (not under .pagedjs-target) so the off-screen probe that measures
-   the header's height resolves the same styles as the rendered header. */
+/* The header overlays the spacer reserved by the column flows on page 1.
+   Its offscreen measurement probe receives the same shared margin variable. */
 .poc-header {
-  /* Horizontal matches .poc-col's (and PAGE_PADDING_X_PX, which the header probe
-     measures against) so the header lines up with the columns beneath it.
-     The TOP keeps a full 48px, unlike .poc-col's 16px: the header is its own band at
-     the very top of the sheet rather than a Paged.js fragment, and templates draw
-     decorations that reach its upper edge (TwoColumnIcon's avatar badge). At 16px that
-     badge overflowed the sheet. */
-  padding: 48px 48px 0;
+  padding: var(--resume-page-margin) var(--resume-page-margin) 0;
   box-sizing: border-box;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-}
-
-/* On page 1 the header already supplies the top inset, so the columns beneath it
-   must not add their own or the gap doubles. */
-.pagedjs-target .poc-header + .poc-columns > .poc-col {
-  padding-top: 0;
 }
 
 /* Sizes to its content by default. Two earlier attempts at full-height columns
@@ -140,44 +106,20 @@ body {
   min-height: 1123px;
 }
 
-/* Both slots are explicitly sized from the measured column widths, so neither may
-   grow or shrink. min-width:0 is what stops a long unbreakable child (a link, a
-   badge) from forcing the slot wider than its share and pushing into its
-   neighbour - flex items default to min-width:auto, which refuses to shrink below
-   their content. */
-/* Spacing lives on the columns, not the sheet, so a tinted sidebar can bleed to the
-   sheet edge while its text stays inset. A column that paints a background gets the
-   .poc-col-tinted variant below, which drops its own horizontal padding and lets the
-   template's existing padding do the insetting. */
+/* Slot widths include the outer horizontal inset only for untinted templates.
+   Subtracting that inset leaves the exact content width used for pagination. */
 .pagedjs-target .poc-col {
   flex: 0 0 auto;
   min-width: 0;
   box-sizing: border-box;
   overflow: hidden;
-  /* MS Word "Narrow" margins: 12.7mm (0.5in) = 48px, matching PAGE_MARGIN_MM and
-     PAGE_PADDING_X_PX in PagedJsPreview. All three MUST agree - the source is measured
-     against them and Paged.js fragments each column against them, so any disagreement
-     surfaces as an unfilled band at the foot (or right edge) of every page.
-
-     Vertically 16px on both edges: the fragment Paged.js returns is 1090px tall
-     (PAGE_MARGIN_MM 4.3mm) and the slot is 1123px, so 33px is all there is to split.
-     Using more would push the fragment past the sheet's bottom edge, since the
-     fragment height is fixed by the @page rule rather than by this box. */
-  padding: 16px 48px;
+  padding: var(--resume-page-margin);
 }
 
-/* A tinted (sidebar) column keeps only its vertical rhythm - the template's own
-   column node already carries the horizontal padding its design wants, and adding
-   the sheet's 40px on top would inset the panel from the page edge. */
+/* Tinted templates keep their own horizontal insets so backgrounds stay full bleed.
+   Vertical spacing belongs exclusively to the paginator on every page. */
 .pagedjs-target .poc-col-tinted {
-  /* Horizontally zero so the panel bleeds to the sheet edge - that is the whole point
-     of a tinted sidebar. Vertically it takes the same 48px as the main column beside
-     it, so both fragments sit at the same y and share equal top/bottom margins.
-     (The panel's own background still paints edge to edge: the slot carries it, and
-     padding does not clip a background.)
-     16px matches the main column beside it - the 1090px fragment leaves 33px of the
-     1123px slot to share between top and bottom. */
-  padding: 16px 0;
+  padding: var(--resume-page-margin) 0;
 }
 
 /* A panel that marks itself with data-panel-decoration wants its background
@@ -192,16 +134,19 @@ body {
    .pagedjs-target so the unpaginated preview, where the panel IS full height, still
    paints it normally. */
 .pagedjs-target [data-panel-decoration] {
-  /* !important because the decoration is set as an INLINE style by the template, and
-     the fragment Paged.js emits carries that inline style with it. Without it the
-     panel kept painting its own copy partway down the page (wherever its content
-     happened to end) alongside the slot's page-foot copy - two sets of wavy lines. */
+  /* !important because both are set as INLINE styles by the template, and the
+     fragment Paged.js emits carries those inline styles with it. Without this the
+     panel kept painting its own copies partway down the page (wherever its content
+     happened to end) alongside the slot's full-page-height copies - two sets of
+     wavy lines, and (for borderRight) two parallel divider lines a few pixels
+     apart. Both are lifted onto the full-height column slot instead - background
+     via liftPanelDecoration, borderRight via readPanelBorderRight - in
+     PagedJsPreview. */
   background-image: none !important;
+  border-right: none !important;
 }
 
-/* Facing edges get no padding. The slot widths come from the rendered template,
-   where the gutter is already part of each column's measured width - adding padding
-   here would push the combined width past the sheet's 714px content area. */
+/* Preserve the template's existing space between columns. */
 .pagedjs-target .poc-col-left {
   padding-right: 0;
 }
@@ -210,23 +155,8 @@ body {
   padding-left: 0;
 }
 
-/* Beside a tinted sidebar the main column adds NO horizontal padding of its own.
-   These sidebar templates already pad their main column internally (IconRail uses
-   32px 36px), so adding the slot's inset on top doubled it - 148px of horizontal
-   padding on a 540px column left only 392px for text, which read as cramped and
-   forced needless wrapping. Vertical spacing still comes from .poc-col. */
 .pagedjs-target .poc-col-tinted + .poc-col-right {
-  /* Horizontally zero: these templates already pad their main column internally, so
-     the slot's 48px on top of that would double the inset.
-     Vertically the slot DOES centre the fragment. Paged.js hands back a box of exactly
-     its page area (1027px) which is dropped into a 1123px slot - with padding:0 that
-     96px difference all piled up at the FOOT, leaving the content visibly pinned to
-     the top of the page. Splitting it 48/48 puts equal margins above and below, and
-     keeps this column level with the tinted sidebar beside it (which starts at its own
-     32px).
-     16px, not 48: the fragment is now 1090px (PAGE_MARGIN_MM 4.3mm), so only 33px of
-     the 1123px slot is left to split between the two edges. */
-  padding: 16px 0;
+  padding: var(--resume-page-margin) 0;
 }
 
 /* Column slots now hold the page CONTENT (see appendPageContent), not the

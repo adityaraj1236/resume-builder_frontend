@@ -41,9 +41,9 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
   ];
 
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background }}>
+    <div style={{ display: "block", fontFamily: tokens.font.family, background: tokens.background }}>
       {/* Header */}
-      <div data-section-key="header" style={{ textAlign: "center" }}>
+      <div data-section-key="header" style={{ display: "block", textAlign: "center" }}>
         <Heading tokens={tokens} variant="name" dataField="full_name">
           {header?.full_name}
         </Heading>
@@ -63,11 +63,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Summary */}
       {summary?.summary ? (
-        <div data-section-key="summary" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="summary" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<User size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{summary.title || "Professional Summary"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <SummaryParagraph config={{ theme, content: summary }} showHeading={false} showMeta={false} />
           </div>
         </div>
@@ -75,11 +75,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Skills */}
       {skills && skills.categories.length > 0 ? (
-        <div data-section-key="skills" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="skills" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<Settings size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{skills.title || "General Skills"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <SkillsPillCloud config={{ theme, content: skills }} showHeading={false} />
           </div>
         </div>
@@ -87,11 +87,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Experience */}
       {experience && experience.entries.length > 0 ? (
-        <div data-section-key="experience" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="experience" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<Briefcase size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{experience.title || "Work Experience"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <EntryExperience tokens={tokens} entries={experience.entries} companyLayout="role-then-linked-company" />
           </div>
         </div>
@@ -99,11 +99,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Projects */}
       {projects && projects.entries.length > 0 ? (
-        <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="projects" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<Code2 size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{projects.title || "Projects"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <ProjectsLinkList config={{ theme, content: projects }} showHeading={false} />
           </div>
         </div>
@@ -111,11 +111,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Achievements */}
       {achievements && achievements.entries.length > 0 ? (
-        <div data-section-key="achievements" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="achievements" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<Star size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{achievements.title || "Achievements"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <AchievementsBullets config={{ theme, content: achievements }} showHeading={false} />
           </div>
         </div>
@@ -123,11 +123,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Education */}
       {education && education.entries.length > 0 ? (
-        <div data-section-key="education" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="education" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<GraduationCap size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{education.title || "Education"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <EducationSimple config={{ theme, content: education }} showHeading={false} showDetails={false} />
           </div>
         </div>
@@ -135,11 +135,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Certifications */}
       {certifications && certifications.entries.length > 0 ? (
-        <div data-section-key="certifications" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="certifications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<BadgeCheck size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{certifications.title || "Certificates"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <CertificationsList config={{ theme, content: certifications }} showHeading={false} />
           </div>
         </div>
@@ -147,11 +147,11 @@ export default function IconLineTemplate({ sectionsByType, theme }: IconLineTemp
 
       {/* Publications */}
       {publications && publications.entries.length > 0 ? (
-        <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="publications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <IconHeading tokens={tokens} icon={<FileText size={18} strokeWidth={2} color={tokens.accent} />}>
             <span data-field="title">{publications.title || "Publications"}</span>
           </IconHeading>
-          <div style={{ paddingLeft: SECTION_CONTENT_INDENT }}>
+          <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT }}>
             <PublicationsList config={{ theme, content: publications }} showHeading={false} />
           </div>
         </div>

@@ -2,21 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const PAGEDJS_SRC = "/vendor/paged.polyfill.js";
+import { PAGE_MARGIN_PX, pageMarginStyle, continuationCss } from "./pageMargins";
+import { registerOrphanHeadingGuard } from "./orphanHeadingGuard";
 
-const PAGE_MARGIN_MM = 4.3;
+const PAGEDJS_SRC = "/vendor/paged.polyfill.js";
 
 const PAGE_HEIGHT_MM = 297;
 
 const PAGE_WIDTH_PX = 794;
-const PAGE_PADDING_X_PX = 48;
+const PAGE_PADDING_X_PX = PAGE_MARGIN_PX;
 const CONTENT_WIDTH_PX = PAGE_WIDTH_PX - PAGE_PADDING_X_PX * 2;
 
 function columnPageCss(widthPx: number): string {
   return `
+    ${continuationCss}
+
     @page {
       size: ${widthPx}px ${PAGE_HEIGHT_MM}mm;
-      margin: ${PAGE_MARGIN_MM}mm 0;
+      margin: ${PAGE_MARGIN_PX}px 0;
     }
 
     h1, h2 {
@@ -54,6 +57,7 @@ function columnPageCss(widthPx: number): string {
 
 type PagedPreviewer = {
   preview: (content: string, stylesheets: unknown[], target: HTMLElement) => Promise<{ total: number }>;
+  chunker: { hooks: { onOverflow: { register: (fn: (overflow: Range | undefined, rendered: HTMLElement | undefined) => Range | undefined) => void } } };
 };
 
 type PagedWindow = Window & {
@@ -124,6 +128,24 @@ function readPanelBackground(column: HTMLElement): string | null {
   return null;
 }
 
+// The panel's own borderRight only spans its own box, which is as tall as its
+// content - shorter than the page whenever the sidebar has less content than the
+// main column. Lifting it onto the full-height slot (same idea as the background
+// lift above) keeps the divider running the full page height even past where the
+// sidebar's own content ends.
+function readPanelBorderRight(column: HTMLElement): string | null {
+  const candidates = [column, column.firstElementChild as HTMLElement | null];
+  for (const node of candidates) {
+    if (!node) continue;
+    const style = window.getComputedStyle(node);
+    const width = parseFloat(style.borderRightWidth);
+    if (style.borderRightStyle !== "none" && width > 0) {
+      return `${style.borderRightWidth} ${style.borderRightStyle} ${style.borderRightColor}`;
+    }
+  }
+  return null;
+}
+
 function findColumns(source: HTMLElement): { left: HTMLElement; right: HTMLElement; row: HTMLElement } | null {
   const candidates = Array.from(source.querySelectorAll<HTMLElement>("div")).filter((el) => {
     const style = window.getComputedStyle(el);
@@ -184,6 +206,7 @@ function extractHeader(source: HTMLElement, columnsRow: HTMLElement): { markup: 
 
   const probe = document.createElement("div");
   probe.className = "poc-header";
+  probe.style.setProperty("--resume-page-margin", `${PAGE_MARGIN_PX}px`);
   probe.innerHTML = clone.innerHTML;
   probe.style.position = "absolute";
   probe.style.left = "-99999px";
@@ -228,6 +251,7 @@ export default function PagedJsPreview({ children }: PagedJsPreviewProps) {
         }
 
         const sidebarBackground = readPanelBackground(columns.left);
+        const sidebarBorderRight = readPanelBorderRight(columns.left);
 
         const panelDecoration = liftPanelDecoration(columns.left);
 
@@ -243,7 +267,7 @@ export default function PagedJsPreview({ children }: PagedJsPreviewProps) {
 
         const leftRect = columns.left.getBoundingClientRect();
         const rightRect = columns.right.getBoundingClientRect();
-        const measuredGap = Math.max(0, Math.round(rightRect.left - leftRect.right));
+        const measuredGap = Math.max(0, rightRect.left - leftRect.right);
 
         const leftHost = document.createElement("div");
         const rightHost = document.createElement("div");
@@ -258,10 +282,17 @@ export default function PagedJsPreview({ children }: PagedJsPreviewProps) {
 
         try {
           const headerHeight = header?.height ?? 0;
-          const spacer = headerHeight > 0 ? `<div data-poc-header-spacer style="height:${headerHeight}px"></div>` : "";
+          // The column's page margin already reserves the header's top inset.
+          const spacerHeight = Math.max(0, headerHeight - PAGE_MARGIN_PX);
+          const spacer = spacerHeight > 0 ? `<div data-poc-header-spacer style="height:${spacerHeight}px"></div>` : "";
 
-          const leftFlow = await new Paged.Previewer().preview(spacer + columns.left.innerHTML, [{ _: columnPageCss(leftWidth) }], leftHost);
-          const rightFlow = await new Paged.Previewer().preview(spacer + columns.right.innerHTML, [{ _: columnPageCss(rightWidth) }], rightHost);
+          const leftPreviewer = new Paged.Previewer();
+          registerOrphanHeadingGuard(leftPreviewer);
+          const rightPreviewer = new Paged.Previewer();
+          registerOrphanHeadingGuard(rightPreviewer);
+
+          const leftFlow = await leftPreviewer.preview(spacer + columns.left.innerHTML, [{ _: columnPageCss(leftWidth) }], leftHost);
+          const rightFlow = await rightPreviewer.preview(spacer + columns.right.innerHTML, [{ _: columnPageCss(rightWidth) }], rightHost);
           if (cancelled) return;
 
           const leftPages = Array.from(leftHost.querySelectorAll<HTMLElement>(".pagedjs_page"));
@@ -301,22 +332,28 @@ export default function PagedJsPreview({ children }: PagedJsPreviewProps) {
             const row = document.createElement("div");
             row.className = "poc-columns";
             row.style.marginTop = "0";
-            row.style.gap = sidebarBackground ? "0px" : `${measuredGap}px`;
+            row.style.gap = `${measuredGap}px`;
 
             const leftSlot = document.createElement("div");
             leftSlot.className = "poc-col poc-col-left";
-            leftSlot.style.width = `${leftWidth}px`;
+            // Untinted columns were measured inside the page margins. Add the
+            // outer inset to the slot, so its content width stays exactly measured.
+            leftSlot.style.width = `${leftWidth + (sidebarBackground ? 0 : PAGE_MARGIN_PX)}px`;
             if (sidebarBackground) {
               leftSlot.classList.add("poc-col-tinted");
               leftSlot.style.background = sidebarBackground;
               leftSlot.style.alignSelf = "stretch";
               if (panelDecoration) applyPanelDecoration(leftSlot, panelDecoration);
             }
+            if (sidebarBorderRight) {
+              leftSlot.style.borderRight = sidebarBorderRight;
+              leftSlot.style.alignSelf = "stretch";
+            }
             appendPageContent(leftSlot, leftPages[i]);
 
             const rightSlot = document.createElement("div");
             rightSlot.className = "poc-col poc-col-right";
-            rightSlot.style.width = `${rightWidth}px`;
+            rightSlot.style.width = `${rightWidth + (sidebarBackground ? 0 : PAGE_MARGIN_PX)}px`;
             appendPageContent(rightSlot, rightPages[i]);
 
             row.append(leftSlot, rightSlot);
@@ -361,7 +398,7 @@ export default function PagedJsPreview({ children }: PagedJsPreviewProps) {
   }, [children]);
 
   return (
-    <div>
+    <div style={pageMarginStyle}>
       <div className="no-print" style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>
         POC: {status}
       </div>

@@ -29,6 +29,7 @@ import CenteredTimelineTemplate from "@/components/Resume_Builder/resume_templat
 import IconLineTemplate from "@/components/Resume_Builder/resume_templates/IconLineTemplate";
 import PagedJsPreview from "@/components/Resume_Builder/pagedjs_poc/PagedJsPreview";
 import PagedJsSingleFlow from "@/components/Resume_Builder/pagedjs_poc/PagedJsSingleFlow";
+import { PAGE_MARGIN_PX } from "@/components/Resume_Builder/pagedjs_poc/pageMargins";
 
 // Single-column templates: one Paged.js run over the whole template. This is what
 // Paged.js is designed for, so it needs no column detection, header extraction or
@@ -291,7 +292,7 @@ export default function ResumeRenderer({ initialDocument, designRegistry }: Resu
             style={{
               background: !usesCustomShell ? themeTokens.background : "#ffffff",
               color: !usesCustomShell ? themeTokens.foreground : "#1a1a1a",
-              padding: !usesCustomShell ? themeTokens.spacing.pagePad : 0,
+              padding: !usesCustomShell ? PAGE_MARGIN_PX : 0,
               maxWidth: 820,
               margin: "0 auto",
               boxShadow: "0 1px 4px rgba(0,0,0,0.12)",

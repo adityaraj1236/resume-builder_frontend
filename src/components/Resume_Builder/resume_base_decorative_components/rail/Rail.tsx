@@ -39,16 +39,22 @@ export default function Rail({ tokens, x = 13, top = 14, bottom = 14, color }: R
 // x..x+2, centred on the 28px icons' midpoint at 14, and the content keeps every
 // pixel it had. Backgrounds repeat on each fragment of a split element, so the rail
 // still survives pagination - which is the whole point of not using <Rail/>.
-export function railBorderStyle(tokens: ThemeTokens, x = 13, color?: string, inset = 14): React.CSSProperties {
+type RailStyle = React.CSSProperties & {
+  "--resume-rail-top": string;
+  "--resume-rail-bottom": string;
+};
+
+export function railBorderStyle(tokens: ThemeTokens, x = 13, color?: string, inset = 14): RailStyle {
   const stripe = color ?? tokens.surface.border;
   const width = 2;
   return {
+    "--resume-rail-top": `${inset}px`,
+    "--resume-rail-bottom": `${inset}px`,
     backgroundImage: `linear-gradient(to right, transparent ${x}px, ${stripe} ${x}px, ${stripe} ${x + width}px, transparent ${x + width}px)`,
-    // Inset top and bottom to match <Rail/>'s own top/bottom of 14, so the line
-    // starts and ends level with the first and last icon rather than running to
-    // the very edge of the column.
-    backgroundPosition: `0 ${inset}px`,
-    backgroundSize: `100% calc(100% - ${inset * 2}px)`,
+    // Keep the original endpoints. Pagination clears only the inset at a split
+    // edge on wrappers marked data-resume-rail.
+    backgroundPosition: "0 var(--resume-rail-top)",
+    backgroundSize: "100% calc(100% - var(--resume-rail-top) - var(--resume-rail-bottom))",
     backgroundRepeat: "no-repeat",
   };
 }

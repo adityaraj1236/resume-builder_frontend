@@ -55,6 +55,7 @@ export default function RailSectionHeading({
   return (
     <div
       style={{
+        display: "block",
         position: "relative",
         breakAfter: "avoid",
         pageBreakAfter: "avoid",

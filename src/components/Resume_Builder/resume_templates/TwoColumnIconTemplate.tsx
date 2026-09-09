@@ -1,4 +1,5 @@
 "use client";
+import { COLUMN_GAP_PX } from "../pagedjs_poc/pageMargins";
 import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Badge, EntryLinkList, Divider, TwoColumnLayout, HeaderSplit, EntryExperience, ProjectsLinkList, EducationSimple, Briefcase, GraduationCap, Tag, ImageIconLucide, Award, BookOpen } from "@/components/Resume_Builder/resume_templates_imports";
 import RailSectionHeading, { railIndentFor } from "@/components/Resume_Builder/resume_base_decorative_components/railSectionHeading/RailSectionHeading";
 export const templateId = "two-column-icon-v1";
@@ -18,25 +19,22 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
   const { header, summary, experience, education, skills, projects, certifications, publications } = getTypedSections(sectionsByType);
 
   return (
-    <div style={{ fontFamily: tokens.font.family, color: tokens.foreground }}>
+    <div style={{ display: "block", fontFamily: tokens.font.family, color: tokens.foreground }}>
       {/* Header */}
-      <div data-section-key="header">
+      <div data-section-key="header" style={{ display: "block" }}>
         {header ? <HeaderSplit config={{ theme, content: header }} summaryText={summary?.summary} /> : null}
       </div>
 
       <Divider tokens={tokens} marginTop={tokens.spacing.sectionGap} marginBottom={tokens.spacing.sectionGap} bleedLeft />
 
-      <div style={{ marginTop: tokens.spacing.sectionGap }}>
+      <div style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
         <TwoColumnLayout
           tokens={tokens}
           /* Widening the left column pushes the right one further right. Kept as a
              percentage so both columns still scale with the page rather than being
              pinned to a fixed pixel split. */
           leftWidth="54%"
-          /* Wider gutter between the two columns than the section rhythm would give,
-             so the left column's bullets and the right column's badges do not read as
-             one continuous block. */
-          gap={tokens.spacing.sectionGap * 1.8}
+          gap={COLUMN_GAP_PX}
           rightAlign={false}
           left={
             // Block flow, not a flex column. A flex item is fragmented as one opaque
@@ -65,11 +63,11 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Education */}
               {education && education.entries.length > 0 ? (
-                <div data-section-key="education" style={{ marginTop: tokens.spacing.sectionGap }}>
+                <div data-section-key="education" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<GraduationCap size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {education.title}
                   </RailSectionHeading>
-                  <div style={{ paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
+                  <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
                     <EducationSimple config={{ theme, content: education }} showHeading={false} layout="stacked" />
                   </div>
                 </div>
@@ -86,11 +84,11 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
                     // A single skill category is small, so it stays atomic - but the
                     // categories are no longer flex siblings, so the LIST of them can
                     // break between categories.
-                    <div key={index} style={{ marginTop: index > 0 ? tokens.spacing.itemGap : 0, breakInside: "avoid", pageBreakInside: "avoid" }}>
+                    <div key={index} style={{ display: "block", marginTop: index > 0 ? tokens.spacing.itemGap : 0, breakInside: "avoid", pageBreakInside: "avoid" }}>
                       <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<Tag size={12} strokeWidth={2} color="white" />} tokens={tokens}>
                         <span data-field={`categories.${index}.category_name`}>{category.category_name}</span>
                       </RailSectionHeading>
-                      <div style={{ paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
+                      <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
                         {category.skills.map((skill, skillIndex) => (
                           <Badge tokens={tokens} key={skillIndex} borderRadius={tokens.radii.card * 0.6} paddingX={tokens.spacing.itemGap}>
                             {skill}
@@ -104,11 +102,11 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Projects */}
               {projects && projects.entries.length > 0 ? (
-                <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
+                <div data-section-key="projects" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<ImageIconLucide size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {projects.title}
                   </RailSectionHeading>
-                  <div style={{ paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
+                  <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
                     <ProjectsLinkList config={{ theme, content: projects }} showHeading={false} descriptionAsBullets />
                   </div>
                 </div>
@@ -116,11 +114,11 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Certifications */}
               {certifications && certifications.entries.length > 0 ? (
-                <div data-section-key="certifications" style={{ marginTop: tokens.spacing.sectionGap }}>
+                <div data-section-key="certifications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<Award size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {certifications.title}
                   </RailSectionHeading>
-                  <div style={{ paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
+                  <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
                     <EntryLinkList
                       tokens={tokens}
                       heading="Certifications"
@@ -145,11 +143,11 @@ export default function TwoColumnIconTemplate({ sectionsByType, theme }: TwoColu
 
               {/* Publications */}
               {publications && publications.entries.length > 0 ? (
-                <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
+                <div data-section-key="publications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
                   <RailSectionHeading iconSize={SECTION_ICON_SIZE} textColor="accent" underline="divider-below" icon={<BookOpen size={12} strokeWidth={2} color="white" />} tokens={tokens} dataField="title">
                     {publications.title}
                   </RailSectionHeading>
-                  <div style={{ paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
+                  <div style={{ display: "block", paddingLeft: SECTION_CONTENT_INDENT(tokens) }}>
                     <EntryLinkList
                       tokens={tokens}
                       heading="Publications"

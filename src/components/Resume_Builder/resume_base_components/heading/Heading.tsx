@@ -73,7 +73,7 @@ export default function Heading({
 
   const showDivider = withDivider ?? true;
   return (
-    <div style={{ marginBottom: pillOnly ? tokens.spacing.itemGap : tokens.spacing.itemGap * 0.6, breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+    <div data-resume-heading style={{ display: "block", marginBottom: pillOnly ? tokens.spacing.itemGap : tokens.spacing.itemGap * 0.6, breakAfter: "avoid", pageBreakAfter: "avoid" }}>
       <Text tokens={tokens} as="h2" size={size} color={color} bold uppercase style={{ letterSpacing: 1 }} dataField={dataField}>
         {children}
       </Text>

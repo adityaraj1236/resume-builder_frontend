@@ -2,15 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const PAGEDJS_SRC = "/vendor/paged.polyfill.js";
+import { PAGE_MARGIN_PX, pageMarginStyle, continuationCss } from "./pageMargins";
+import { registerOrphanHeadingGuard } from "./orphanHeadingGuard";
 
-const PAGE_MARGIN_MM = 12.7;
+const PAGEDJS_SRC = "/vendor/paged.polyfill.js";
 
 function pageCss(): string {
   return `
+    ${continuationCss}
+
     @page {
       size: A4;
-      margin: ${PAGE_MARGIN_MM}mm;
+      margin: ${PAGE_MARGIN_PX}px;
     }
 
     h1, h2 {
@@ -48,6 +51,7 @@ function pageCss(): string {
 
 type PagedPreviewer = {
   preview: (content: string, stylesheets: unknown[], target: HTMLElement) => Promise<{ total: number }>;
+  chunker: { hooks: { onOverflow: { register: (fn: (overflow: Range | undefined, rendered: HTMLElement | undefined) => Range | undefined) => void } } };
 };
 
 type PagedWindow = Window & {
@@ -94,7 +98,9 @@ export default function PagedJsSingleFlow({ children }: PagedJsSingleFlowProps) 
         const Paged = await loadPagedJs();
         if (cancelled) return;
 
-        const flow = await new Paged.Previewer().preview(source.innerHTML, [{ _: pageCss() }], target);
+        const previewer = new Paged.Previewer();
+        registerOrphanHeadingGuard(previewer);
+        const flow = await previewer.preview(source.innerHTML, [{ _: pageCss() }], target);
         if (cancelled) return;
         setStatus(`${flow.total} page(s)`);
       } catch (err) {
@@ -111,7 +117,7 @@ export default function PagedJsSingleFlow({ children }: PagedJsSingleFlowProps) 
   }, [children]);
 
   return (
-    <div>
+    <div style={pageMarginStyle}>
       <div className="no-print" style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>
         Paged.js: {status}
       </div>
@@ -119,7 +125,7 @@ export default function PagedJsSingleFlow({ children }: PagedJsSingleFlowProps) 
       <div
         ref={sourceRef}
         aria-hidden
-        style={{ position: "absolute", left: -99999, top: 0, width: 794, visibility: "hidden", pointerEvents: "none" }}
+        style={{ position: "absolute", left: -99999, top: 0, width: 794 - PAGE_MARGIN_PX * 2, visibility: "hidden", pointerEvents: "none" }}
       >
         {children}
       </div>

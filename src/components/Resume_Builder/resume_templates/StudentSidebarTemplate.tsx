@@ -1,10 +1,11 @@
 "use client";
 
+import { PAGE_MARGIN_PX, COLUMN_GAP_PX } from "../pagedjs_poc/pageMargins";
+
 import { type ResumeSection, type ThemeTokens, getThemeTokens, getTypedSections, Photo, Heading, SkillBox, Text, ContactGroup, BulletList, EntryExperience, SummaryParagraph, ProjectsLinkList, EducationSimple, EntryLinkList, Mail, Phone, MapPin, Link2 } from "@/components/Resume_Builder/resume_templates_imports";
 
 export const templateId = "student-sidebar-v1";
 export const templateName = "Student Sidebar";
-const SIDEBAR_TOP_PAD = 32;
 const PHOTO_SIZE = 104;
 
 type SectionsByType = Record<string, ResumeSection>;
@@ -26,9 +27,9 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
   const boxedSkillCategories = categories.slice(1);
 
   const left = (
-    <div style={{ position: "relative", height: "100%", boxSizing: "border-box", background: tokens.surface.card, padding: `${SIDEBAR_TOP_PAD}px 20px 32px 24px` }}>
+    <div style={{ display: "block", position: "relative", height: "100%", boxSizing: "border-box", background: tokens.surface.card, padding: `0 20px 0 ${PAGE_MARGIN_PX}px` }}>
       {/* Accent spine */}
-      <div style={{ position: "absolute", top: 0, left: 0, width: 8, height: SIDEBAR_TOP_PAD + PHOTO_SIZE, background: tokens.accent }} />
+      <div style={{ position: "absolute", top: -PAGE_MARGIN_PX, left: 0, width: 8, height: PAGE_MARGIN_PX + PHOTO_SIZE, background: tokens.accent }} />
 
       {/* Photo */}
       <div style={{ display: "flex", justifyContent: "center" }}>
@@ -37,7 +38,7 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
       <div style={{ height: 1, background: tokens.surface.border, marginTop: tokens.spacing.itemGap }} />
 
       {/* Contact */}
-      <div style={{ marginTop: tokens.spacing.sectionGap }}>
+      <div style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
         <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>Contact</Heading>
         <ContactGroup
           tokens={tokens}
@@ -58,10 +59,10 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
       {softSkillsCategory && softSkillsCategory.skills.length > 0 ? (
         <>
           <div style={{ height: 1, background: tokens.surface.border, marginTop: tokens.spacing.sectionGap }} />
-          <div data-section-key="skills" style={{ marginTop: tokens.spacing.sectionGap }}>
+          <div data-section-key="skills" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
             {/* Glued to its first bullet so the heading can never be left alone at the
                 foot of a page; the list itself stays free to flow. */}
-            <div style={{ breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+            <div style={{ display: "block", breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
               <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>
                 <span data-field="categories.0.category_name">{softSkillsCategory.category_name}</span>
               </Heading>
@@ -83,8 +84,8 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
                     the next page rather than letting the boxes continue there. The
                     heading below carries breakAfter:avoid instead, so a break can only
                     fall BETWEEN boxes - never between a category and its first box. */}
-                <div style={{ marginTop: tokens.spacing.sectionGap }}>
-                  <div style={{ breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
+                <div style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
+                  <div style={{ display: "block", breakInside: "avoid", pageBreakInside: "avoid", breakAfter: "avoid", pageBreakAfter: "avoid" }}>
                     <Heading tokens={tokens} size="small" color="foreground" pillDivider pillOnly>
                       <span data-field={`categories.${realIndex}.category_name`}>{category.category_name}</span>
                     </Heading>
@@ -95,7 +96,7 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
                       former `gap`. */}
                   <div>
                     {category.skills.map((skill, skillIndex) => (
-                      <div key={skillIndex} style={{ marginBottom: tokens.spacing.itemGap * 0.6, breakInside: "avoid", pageBreakInside: "avoid" }}>
+                      <div key={skillIndex} style={{ display: "block", marginBottom: tokens.spacing.itemGap * 0.6, breakInside: "avoid", pageBreakInside: "avoid" }}>
                         <SkillBox tokens={tokens}>
                           <span data-field={`categories.${realIndex}.skills.${skillIndex}`}>{skill}</span>
                         </SkillBox>
@@ -111,13 +112,10 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
   );
 
   const right = (
-    // The left inset is the column's own, not the row's. It used to be 0 and rely on
-    // the parent flex `gap` for separation from the sidebar - but that gap is dropped
-    // when the columns are composed onto a paginated sheet (a tinted sidebar's panel
-    // edge is the divider there), which left this text flush against the panel.
-    <div style={{ padding: "32px 36px 32px 40px", boxSizing: "border-box" }}>
+    // The row owns the column gap; this wrapper supplies only the outer right margin.
+    <div style={{ display: "block", padding: `0 ${PAGE_MARGIN_PX}px 0 0`, boxSizing: "border-box" }}>
       {/* Header */}
-      <div data-section-key="header">
+      <div data-section-key="header" style={{ display: "block" }}>
         <Heading tokens={tokens} variant="name" dataField="full_name">
           {header?.full_name}
         </Heading>
@@ -129,14 +127,14 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
 
       {/* Summary */}
       {summary?.summary ? (
-        <div data-section-key="summary" style={{ marginTop: tokens.spacing.itemGap }}>
+        <div data-section-key="summary" style={{ display: "block", marginTop: tokens.spacing.itemGap }}>
           <SummaryParagraph config={{ theme, content: summary }} showHeading={false} showMeta={false} />
         </div>
       ) : null}
 
       {/* Education */}
       {education && education.entries.length > 0 ? (
-        <div data-section-key="education" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="education" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} pillDivider dataField="title">{education.title || "Education"}</Heading>
           <EducationSimple config={{ theme, content: education }} showHeading={false} layout="stacked-with-courses" />
         </div>
@@ -144,7 +142,7 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
 
       {/* Experience */}
       {experience && experience.entries.length > 0 ? (
-        <div data-section-key="experience" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="experience" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} pillDivider dataField="title">{experience.title || "Experience"}</Heading>
           <EntryExperience tokens={tokens} entries={experience.entries} companyLayout="role-then-company" achievementsLabel="bold-uppercase-accent" />
         </div>
@@ -152,7 +150,7 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
 
       {/* Projects */}
       {projects && projects.entries.length > 0 ? (
-        <div data-section-key="projects" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="projects" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} pillDivider dataField="title">{projects.title || "Projects"}</Heading>
           <ProjectsLinkList config={{ theme, content: projects }} showHeading={false} textColor="foreground" />
         </div>
@@ -160,7 +158,7 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
 
       {/* Certifications */}
       {certifications && certifications.entries.length > 0 ? (
-        <div data-section-key="certifications" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="certifications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} pillDivider dataField="title">{certifications.title || "Certificates"}</Heading>
           <EntryLinkList
             tokens={tokens}
@@ -185,7 +183,7 @@ function buildSplitSections({ sectionsByType, theme }: StudentSidebarTemplatePro
 
       {/* Publications */}
       {publications && publications.entries.length > 0 ? (
-        <div data-section-key="publications" style={{ marginTop: tokens.spacing.sectionGap }}>
+        <div data-section-key="publications" style={{ display: "block", marginTop: tokens.spacing.sectionGap }}>
           <Heading tokens={tokens} pillDivider dataField="title">{publications.title || "Publications"}</Heading>
           <EntryLinkList
             tokens={tokens}
@@ -222,7 +220,7 @@ export default function StudentSidebarTemplate({ sectionsByType, theme }: Studen
   // A fixed sidebar width removes the percentage/min-width conflict entirely, and the
   // main column takes whatever is left.
   return (
-    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: tokens.spacing.sectionGap }}>
+    <div style={{ fontFamily: tokens.font.family, background: tokens.background, display: "flex", alignItems: "stretch", gap: COLUMN_GAP_PX }}>
       <div style={{ flex: "0 0 230px", minWidth: 0 }}>{left}</div>
       <div style={{ flex: "1 1 auto", minWidth: 0 }}>{right}</div>
     </div>
